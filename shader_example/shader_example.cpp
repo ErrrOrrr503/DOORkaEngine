@@ -19,8 +19,10 @@ const unsigned int SCR_HEIGHT = 800;
 glm::vec3 g_camera_pos(0.0f, 0.0f, 0.1f);
 glm::vec3 g_camera_direction(0.0f, 0.0f, -1.0f);
 glm::vec3 g_camera_up(0.0f, 1.0f, 0.0f);
+float g_camera_angle = 0.0f;
 // Camera velocity in unit/sec
 float g_camera_velocity = 0.5f;
+float g_angular_velocity = 0.5f;
 // Timing variables
 float g_elapsed_time = 0.0f;
 float g_last_frame = 0.0f;
@@ -53,16 +55,28 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         g_camera_pos += g_camera_velocity * g_elapsed_time * g_camera_direction;
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         g_camera_pos -= g_camera_velocity * g_elapsed_time * g_camera_direction;
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         g_camera_pos -= glm::normalize(glm::cross(g_camera_direction, g_camera_up)) 
         * g_camera_velocity * g_elapsed_time;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         g_camera_pos += glm::normalize(glm::cross(g_camera_direction, g_camera_up)) 
         * g_camera_velocity * g_elapsed_time;
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        g_camera_angle -= g_angular_velocity * g_elapsed_time;
+        if (g_camera_angle < -M_PI)
+            g_camera_angle += M_PI + M_PI;
+        g_camera_direction = glm::vec3(sinf(g_camera_angle), 0.0f, -cosf(g_camera_angle));
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        g_camera_angle += g_angular_velocity * g_elapsed_time;
+        if (g_camera_angle > M_PI)
+            g_camera_angle -= M_PI + M_PI;
+        g_camera_direction = glm::vec3(sinf(g_camera_angle), 0.0f, -cosf(g_camera_angle));
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
