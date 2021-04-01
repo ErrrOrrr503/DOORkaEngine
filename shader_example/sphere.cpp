@@ -58,5 +58,5 @@ void sphere::draw()
 
 sphere::~sphere()
 {
-    delete vertices;
+    delete[] vertices;
 }

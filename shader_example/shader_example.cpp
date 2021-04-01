@@ -6,23 +6,39 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "sphere.h"
+#include <glm/glm.hpp>
+#include <glm/matrix.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // Window size constants
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
+// Camera position variables
+glm::vec3 g_camera_pos(0.0f, 0.0f, 0.1f);
+glm::vec3 g_camera_direction(0.0f, 0.0f, -1.0f);
+glm::vec3 g_camera_up(0.0f, 1.0f, 0.0f);
+// Camera velocity in unit/sec
+float g_camera_velocity = 0.5f;
+// Timing variables
+float g_elapsed_time = 0.0f;
+float g_last_frame = 0.0f;
+
 // Shader source code (maybe it's a good idea to write in into a separate file and #include it)
 const GLchar* vshaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+"uniform mat4 view;"
 "void main()\n"
 "{\n"
-"    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"    gl_Position = view * vec4(aPos, 1.0);\n"
 "}\n\0";
 const GLchar* fshaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
+"uniform vec4 requestedColor;\n"
 "void main()\n"
 "{\n"
-"    FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+"    FragColor = requestedColor;\n"
 "}\n";
 
 void init()
@@ -35,8 +51,18 @@ void init()
 
 void processInput(GLFWwindow *window)
 {
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        g_camera_pos += g_camera_velocity * g_elapsed_time * g_camera_direction;
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        g_camera_pos -= g_camera_velocity * g_elapsed_time * g_camera_direction;
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        g_camera_pos -= glm::normalize(glm::cross(g_camera_direction, g_camera_up)) 
+        * g_camera_velocity * g_elapsed_time;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        g_camera_pos += glm::normalize(glm::cross(g_camera_direction, g_camera_up)) 
+        * g_camera_velocity * g_elapsed_time;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -57,7 +83,7 @@ int main()
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return 1;
-    }
+    }     
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -100,17 +126,29 @@ int main()
     glDeleteShader(fshader);
 
     // Make final initialization
-    sphere sfera(0.0, 0.0, 0.0, 1.0, 98, 10);
+    sphere sfera(0.0, 0.0, 0.0, 1.0, 98, 100);
     init();
+    glm::mat4 view;
 
     // Starting render loop
     while(!glfwWindowShouldClose(window)) {
         processInput(window);
         glClear(GL_COLOR_BUFFER_BIT);
+        // Getting the location of uniform variable with color vector
+        GLint colorVarLocation = glGetUniformLocation(shaderProgram, "requestedColor");
+        GLint viewVarLocation = glGetUniformLocation(shaderProgram, "view");
         glUseProgram(shaderProgram);
+        // Setting color
+        glUniform4f(colorVarLocation, 1.0f, 1.0f, 0.1f, 1.0f);
+        // Setting view matrix
+        view = glm::lookAt(g_camera_pos, g_camera_pos + g_camera_direction, g_camera_up);
+        glUniformMatrix4fv(viewVarLocation, 1, GL_FALSE, glm::value_ptr(view));
         sfera.draw();
         glfwSwapBuffers(window);
-        glfwWaitEvents();
+        float cur_time = glfwGetTime();
+        g_elapsed_time = cur_time - g_last_frame;
+        g_last_frame = cur_time;
+        glfwPollEvents();
     }
 
     // Cleaning up before leaving

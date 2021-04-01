@@ -15,7 +15,7 @@ oshposhmak: sphere.o shader_example.o
 sphere.o: sphere.cpp
 	$(CC) $(CFLAGS) $(LFLAGS) -c sphere.cpp $(LFLAGS)
 
-oshposhmak.o: shader_example.cpp
+shader_example.o: shader_example.cpp
 	$(CC) $(CFLAGS) $(LFLAGS) -c shader_example.cpp $(LFLAGS)
 
 clean:
