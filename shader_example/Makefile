@@ -11,6 +11,7 @@ all: oshposhmak
 
 oshposhmak: sphere.o shader_example.o
 	$(CC) $(LFLAGS) sphere.o shader_example.o -o shader_example.exe
+	make clean
 
 sphere.o: sphere.cpp
 	$(CC) $(CFLAGS) $(LFLAGS) -c sphere.cpp $(LFLAGS)
