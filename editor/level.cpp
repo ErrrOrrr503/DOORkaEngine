@@ -18,6 +18,10 @@ void Level::select_wall (float x, float y)
         selected_wall.a1[0] = floor (x / cell_size) * cell_size;
         selected_wall.a2[0] = (floor (x / cell_size) + 1) * cell_size;
     }
+    selected_wall.a1[2] = selected_wall.a1[2] = 0;
+    selected_wall.a1[3] = selected_wall.a1[3] = DEF_WALL_HEIGHT;
+    selected_wall.a2[2] = selected_wall.a2[2] = 0;
+    selected_wall.a2[3] = selected_wall.a2[3] = DEF_WALL_HEIGHT;
 }
 
 void Level::add_wall ()

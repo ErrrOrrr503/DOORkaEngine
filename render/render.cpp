@@ -7,6 +7,7 @@ camera *gCamera; //crunch... BF crunch for BF cringe... to use in c-callback of 
 Render::Render (Level &level)
 {
     //fixme: start position of cam in level, will use (0 0 0) (1 0 0) instead
+    level_ = &level;
     glfwInit ();
     glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR, 1);
     glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -25,7 +26,9 @@ Render::Render (Level &level)
         status_ = err_glew;
     }
     draw_mode_ = gl12; //fixme: different renders according to hw, same interface;
-    gCamera = new camera (window_, glm::vec3 (1, 0, 0), glm::vec3 (0, 0, 0));
+    gCamera = new camera (window_, glm::vec3 (0, 0, 25.0 / CELL_SIZE), glm::vec3 (1, 0, 0));
+    glEnable (GL_DEPTH_TEST);
+    glEnable (GL_MULTISAMPLE);
 }
 
 Render::~Render ()
@@ -45,15 +48,37 @@ void Render::draw_gl12 ()
         status_ = should_close;
         return;
     }
-    sphere sfera(0.0, 0.0, 0.0, 1.0, 98, 100);
     gCamera->relocateView ();
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode (GL_MODELVIEW);
     glLoadMatrixf (glm::value_ptr(gCamera->getViewMatrix()));
     glMatrixMode (GL_PROJECTION);
     glLoadMatrixf (glm::value_ptr(gCamera->getPerspMatrix()));
     glColor3f (1.0f, 1.0f, 0.1f);
-    sfera.draw();
+    //now camera is set and we can draw
+    GLfloat wall[12];
+    for (size_t i = 0; i < level_->walls.size (); i++) {
+        glColor3f (level_->walls[i].color[0], level_->walls[i].color[1], level_->walls[i].color[2]);
+        wall[0] = level_->walls[i].a1[0] / CELL_SIZE;
+        wall[1] = level_->walls[i].a1[1] / CELL_SIZE;
+        wall[2] = level_->walls[i].a1[2] / CELL_SIZE;
+        wall[3] = level_->walls[i].a1[0] / CELL_SIZE;
+        wall[4] = level_->walls[i].a1[1] / CELL_SIZE;
+        wall[5] = level_->walls[i].a1[3] / CELL_SIZE;
+        wall[6] = level_->walls[i].a2[0] / CELL_SIZE;
+        wall[7] = level_->walls[i].a2[1] / CELL_SIZE;
+        wall[8] = level_->walls[i].a2[2] / CELL_SIZE;
+        wall[9] = level_->walls[i].a2[0] / CELL_SIZE;
+        wall[10] = level_->walls[i].a2[1] / CELL_SIZE;
+        wall[11] = level_->walls[i].a2[3] / CELL_SIZE;
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glVertexPointer (3, GL_FLOAT, 0, wall);
+        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        glLineWidth (2);
+        glColor3f (0.8, 0.2, 0);
+        glDrawArrays (GL_LINE_LOOP, 0, 4);
+    }
+
     gCamera->acquireDeltaTime();
     glfwSwapBuffers(window_);
 }

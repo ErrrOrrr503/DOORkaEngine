@@ -21,6 +21,10 @@
 #define LEVEL_X 10000
 #define LEVEL_Y 10000
 #define CELL_SIZE 50
+#define DEF_WALL_HEIGHT 50
+#define DEF_WALL_COLOR_R 0.2
+#define DEF_WALL_COLOR_G 0.8
+#define DEF_WALL_COLOR_B 0.0
 //</LEVEL_DIMENSIONS for coordinate system>
 
 struct level_fileheader {
@@ -33,7 +37,7 @@ struct level_fileheader {
 struct wall {
     float a1[4]; // x y zlow zhigh
     float a2[4];
-    float color[3];
+    float color[3] = {DEF_WALL_COLOR_R, DEF_WALL_COLOR_G, DEF_WALL_COLOR_B};
 };
 
 int load_level_common (std::vector<wall> &walls, std::ifstream &infile);
