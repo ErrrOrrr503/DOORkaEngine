@@ -17,6 +17,18 @@
  */
 class camera
 {
+public:
+    //! @brief Structure where keybindings for camera control are stored.
+    struct key_container
+    {
+        GLint rot_up, rot_down, rot_left, rot_right;
+        GLint mv_fwd, mv_bck, mv_left, mv_right;
+        key_container();
+        key_container(GLint r_up, GLint r_down, GLint r_left, GLint r_right,
+            GLint m_fwd, GLint m_bck, GLint m_left, GLint m_right);
+        ~key_container() = default;
+    };
+
 private:
     // Connected window variables
     GLFWwindow* window_;
@@ -44,6 +56,7 @@ private:
     GLfloat field_of_view_ = glm::radians(45.0f);
     GLfloat near_clipping_plane_ = 0.1f;
     GLfloat far_clipping_plane_ = 100.0f;
+    key_container keys_;
 
 public:
     /*!
@@ -162,6 +175,11 @@ public:
      * @return Matrix value
      */
     glm::mat4 getPerspMatrix();
+    /*!
+     * @brief Bind keys used to control camera.
+     * @param keys Structure with key codes
+     */
+    void setControls(const camera::key_container& keys);
 
 private:
     void calculatePerspective_();

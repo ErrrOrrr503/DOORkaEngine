@@ -122,6 +122,12 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, cursor_callback);
     g_cumera->setMouseSensitivity(0.005f);
+#ifdef DE_SET_VIM_MODE
+    g_cumera->setControls(camera::key_container(
+        GLFW_KEY_UP, GLFW_KEY_DOWN,  GLFW_KEY_LEFT, GLFW_KEY_RIGHT,
+        GLFW_KEY_J, GLFW_KEY_K, GLFW_KEY_H, GLFW_KEY_L
+    ));
+#endif
 
     // Starting render loop
     while(!glfwWindowShouldClose(window)) {
