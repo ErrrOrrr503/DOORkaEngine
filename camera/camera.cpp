@@ -2,10 +2,22 @@
 
 camera::camera(GLFWwindow* window)
 {
-    this->window_ = window;
+    window_ = window;
+    glfwGetFramebufferSize (window, &window_width_, &window_height_);
+    ratio_ = (GLfloat)window_width_ / (GLfloat)window_height_;
     calculatePerspective_();
     // А как узнать размер окна на старте программы?
-    // Как вообще его узнать в произвольный момент?
+    // Как вообще его узнать в произвольный момент? (by errrorrr: look upwards)
+}
+
+camera::camera(GLFWwindow* window, glm::vec3 start_positionv, glm::vec3 start_directionv)
+{
+    window_ = window;
+    glfwGetFramebufferSize (window, &window_width_, &window_height_);
+    ratio_ = (GLfloat)window_width_ / (GLfloat)window_height_;
+    direction_ = start_directionv;
+    position_ = start_positionv;
+    calculatePerspective_();
 }
 
 void camera::resetWindowSize(GLint width, GLint height)
@@ -13,6 +25,7 @@ void camera::resetWindowSize(GLint width, GLint height)
     this->window_width_ = width;
     this->window_height_ = height;
     ratio_ = (GLfloat)width / (GLfloat)height;
+    calculatePerspective_();
 }
 
 void camera::relocateView()
@@ -40,11 +53,11 @@ void camera::relocateView()
             course_ -= M_PI + M_PI;
     }
     if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
-        if (pitch_ < M_PI_2)
+        if (pitch_ < M_PI_2 - MIN_ANGLE)
             pitch_ += ang_velocity_ * (GLfloat)elapsed_time_;
     }
     if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        if (pitch_ > -M_PI_2)
+        if (pitch_ > -M_PI_2 + MIN_ANGLE)
             pitch_ -= ang_velocity_ * (GLfloat)elapsed_time_;
     }
 
@@ -118,4 +131,38 @@ void camera::setLinearVelocity(GLfloat value)
 void camera::setAngularVelocity(GLfloat value)
 {
     ang_velocity_ = value;
+}
+
+void camera::setPosition(glm::vec3 positionv)
+{
+    position_ = positionv;
+    relocateView();
+}
+
+void camera::setDirection(glm::vec3 directionv)
+{
+    direction_ = directionv;
+    relocateView();
+}
+
+void camera::setMouseSensitivity(GLfloat value)
+{
+    mouse_sensitivity_ = value;
+}
+
+void camera::rotateViewMouse(GLfloat x_cursor_offset, GLfloat y_cursor_offset)
+{
+    course_ += x_cursor_offset * mouse_sensitivity_;
+    pitch_ -= y_cursor_offset * mouse_sensitivity_;
+    if (pitch_ > M_PI_2 - MIN_ANGLE)
+        pitch_ = M_PI_2 - MIN_ANGLE;
+    if (pitch_ < -M_PI_2 + MIN_ANGLE)
+        pitch_ = -M_PI_2 + MIN_ANGLE;
+    
+    direction_ = glm::vec3(
+        sinf(course_) * cosf(pitch_),
+        sinf(pitch_),
+        -cosf(course_) * cosf(pitch_)
+    );
+    view_ = glm::lookAt(position_, position_ + direction_, cam_up_);
 }

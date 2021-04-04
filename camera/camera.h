@@ -22,6 +22,8 @@ private:
     glm::vec3 cam_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
     GLfloat course_ = 0.0f;
     GLfloat pitch_ = 0.0f;
+    const GLfloat MIN_ANGLE = 1e-5f;
+    GLfloat mouse_sensitivity_ = 0.01f;
     // Camera velocity in unit/sec
     GLfloat lin_velocity_ = 2.0f;
     GLfloat ang_velocity_ = 2.0f;
@@ -38,6 +40,7 @@ private:
 
 public:
     camera(GLFWwindow* window);
+    camera(GLFWwindow* window, glm::vec3 start_positionv, glm::vec3 start_directionv);
     camera() = delete;
     ~camera() = default;
     void resetWindowSize(GLint width, GLint height);
@@ -48,6 +51,10 @@ public:
     void setNearClippingPlane(GLfloat position);
     void setLinearVelocity(GLfloat value);
     void setAngularVelocity(GLfloat value);
+    void setMouseSensitivity(GLfloat value);
+    void setPosition(glm::vec3 positionv);
+    void setDirection(glm::vec3 directionv);
+    void rotateViewMouse(GLfloat x_cursor_offset, GLfloat y_cursor_offset);
     GLdouble acquireDeltaTime();
     glm::mat4 getViewMatrix();
     glm::mat4 getPerspMatrix();
