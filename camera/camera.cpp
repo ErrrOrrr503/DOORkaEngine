@@ -32,10 +32,10 @@ void camera::relocateView()
 {
     if (glfwGetKey(window_, keys_.mv_fwd) == GLFW_PRESS)
         position_ += lin_velocity_ * (GLfloat)elapsed_time_
-        * glm::vec3(direction_.x, 0.0f, direction_.z);
+        * glm::vec3(sinf(course_), 0.0f, -cosf(course_));
     if (glfwGetKey(window_, keys_.mv_bck) == GLFW_PRESS)
         position_ -= lin_velocity_ * (GLfloat)elapsed_time_
-        * glm::vec3(direction_.x, 0.0f, direction_.z);;
+        * glm::vec3(sinf(course_), 0.0f, -cosf(course_));
     if (glfwGetKey(window_, keys_.mv_left) == GLFW_PRESS)
         position_ -= glm::normalize(glm::cross(direction_, cam_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
