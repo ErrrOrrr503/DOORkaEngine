@@ -42,6 +42,11 @@ void camera::relocateView()
     if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS)
         position_ += glm::normalize(glm::cross(direction_, cam_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
+    
+    if (!keyboard_rotation_enabled_)
+        return;
+    
+    // else process rotation with keyboard and compute direction vector
     if (glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS) {
         course_ -= ang_velocity_ * (GLfloat)elapsed_time_;
         if (course_ < -M_PI)
@@ -65,13 +70,12 @@ void camera::relocateView()
         sinf(course_) * cosf(pitch_),
         sinf(pitch_),
         -cosf(course_) * cosf(pitch_)
-    );
-    view_ = glm::lookAt(position_, position_ + direction_, cam_up_);
+    ); 
 }
 
 glm::mat4 camera::getViewMatrix()
 {
-    return view_;
+    return glm::lookAt(position_, position_ + direction_, cam_up_);
 }
 
 glm::mat4 camera::getPerspMatrix()
@@ -164,5 +168,9 @@ void camera::rotateViewMouse(GLfloat x_cursor_offset, GLfloat y_cursor_offset)
         sinf(pitch_),
         -cosf(course_) * cosf(pitch_)
     );
-    view_ = glm::lookAt(position_, position_ + direction_, cam_up_);
+}
+
+void camera::enableKeyboardRotation(bool state)
+{
+    keyboard_rotation_enabled_ = state;
 }

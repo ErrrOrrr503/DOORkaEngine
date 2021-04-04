@@ -1,6 +1,5 @@
 /*
- * This example draws a polygonal sphere using GLSL shaders.
- * Also sets esc key to close the window.
+ * This example draws a polygonal sphere and sets up camera class for further use.
  */
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,7 +11,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "../camera/camera.h"
 
+#ifdef DE_USE_SHADERS
 #include "shader_source"
+#endif
 
 // Window size constants
 const unsigned int SCR_WIDTH = 800;
@@ -62,7 +63,6 @@ int main()
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "DOORka", NULL, NULL);
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -78,7 +78,8 @@ int main()
         return -1;
     }
 
-    /* Compiling shader program
+#ifdef DE_USE_SHADERS
+    // Compiling shader program
     unsigned int vshader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vshader, 1, &vshaderSource, NULL);
     glCompileShader(vshader);
@@ -109,7 +110,10 @@ int main()
     }
     glDeleteShader(vshader); // They are no longer needed, we already have a ready-to-use shader program
     glDeleteShader(fshader);
-    */
+    GLint colorVarLocation = glGetUniformLocation(shaderProgram, "requestedColor");
+    GLint viewVarLocation = glGetUniformLocation(shaderProgram, "view");
+    GLint perspVarLocation = glGetUniformLocation(shaderProgram, "perspective");
+#endif
 
     // Make final initialization
     sphere sfera(0.0, 0.0, 0.0, 1.0, 98, 100);
@@ -117,27 +121,28 @@ int main()
     init();
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, cursor_callback);
-
-    //GLint colorVarLocation = glGetUniformLocation(shaderProgram, "requestedColor");
-    //GLint viewVarLocation = glGetUniformLocation(shaderProgram, "view");
-    //GLint perspVarLocation = glGetUniformLocation(shaderProgram, "perspective");
+    g_cumera->setMouseSensitivity(0.005f);
 
     // Starting render loop
     while(!glfwWindowShouldClose(window)) {
         processInput(window);
         g_cumera->relocateView();
         glClear(GL_COLOR_BUFFER_BIT);
+#ifdef DE_USE_SHADERS
         // Getting the location of uniform variable with color vector
-        //glUseProgram(shaderProgram);
+        glUseProgram(shaderProgram);
         // Setting color
-        //glUniform4f(colorVarLocation, 1.0f, 1.0f, 0.1f, 1.0f);
-        //glUniformMatrix4fv(viewVarLocation, 1, GL_FALSE, glm::value_ptr(cumera.getViewMatrix()));
-        //glUniformMatrix4fv(perspVarLocation, 1, GL_FALSE, glm::value_ptr(cumera.getPerspMatrix()));
+        glUniform4f(colorVarLocation, 1.0f, 1.0f, 0.1f, 1.0f);
+        // Loading transform matrices into GPU shader program
+        glUniformMatrix4fv(viewVarLocation, 1, GL_FALSE, glm::value_ptr(g_cumera->getViewMatrix()));
+        glUniformMatrix4fv(perspVarLocation, 1, GL_FALSE, glm::value_ptr(g_cumera->getPerspMatrix()));
+#else
         glMatrixMode (GL_MODELVIEW);
         glLoadMatrixf (glm::value_ptr(g_cumera->getViewMatrix()));
         glMatrixMode (GL_PROJECTION);
         glLoadMatrixf (glm::value_ptr(g_cumera->getPerspMatrix()));
         glColor3f (1.0f, 1.0f, 0.1f);
+#endif
         sfera.draw();
         g_cumera->acquireDeltaTime();
         glfwSwapBuffers(window);
