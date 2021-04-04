@@ -38,6 +38,7 @@ private:
 
 public:
     camera(GLFWwindow* window);
+    camera(GLFWwindow* window, glm::vec3 start_positionv, glm::vec3 start_directionv);
     camera() = delete;
     ~camera() = default;
     void resetWindowSize(GLint width, GLint height);
@@ -48,6 +49,8 @@ public:
     void setNearClippingPlane(GLfloat position);
     void setLinearVelocity(GLfloat value);
     void setAngularVelocity(GLfloat value);
+    void setPosition(glm::vec3 positionv);
+    void setDirection(glm::vec3 directionv);
     GLdouble acquireDeltaTime();
     glm::mat4 getViewMatrix();
     glm::mat4 getPerspMatrix();

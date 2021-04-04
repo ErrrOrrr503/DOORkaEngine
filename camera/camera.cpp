@@ -2,10 +2,22 @@
 
 camera::camera(GLFWwindow* window)
 {
-    this->window_ = window;
+    window_ = window;
+    glfwGetFramebufferSize (window, &window_width_, &window_height_);
+    ratio_ = (GLfloat)window_width_ / (GLfloat)window_height_;
     calculatePerspective_();
     // А как узнать размер окна на старте программы?
-    // Как вообще его узнать в произвольный момент?
+    // Как вообще его узнать в произвольный момент? (by errrorrr: look upwards)
+}
+
+camera::camera(GLFWwindow* window, glm::vec3 start_positionv, glm::vec3 start_directionv)
+{
+    window_ = window;
+    glfwGetFramebufferSize (window, &window_width_, &window_height_);
+    ratio_ = (GLfloat)window_width_ / (GLfloat)window_height_;
+    direction_ = start_directionv;
+    position_ = start_positionv;
+    calculatePerspective_();
 }
 
 void camera::resetWindowSize(GLint width, GLint height)
@@ -13,6 +25,7 @@ void camera::resetWindowSize(GLint width, GLint height)
     this->window_width_ = width;
     this->window_height_ = height;
     ratio_ = (GLfloat)width / (GLfloat)height;
+    calculatePerspective_();
 }
 
 void camera::relocateView()
@@ -118,4 +131,16 @@ void camera::setLinearVelocity(GLfloat value)
 void camera::setAngularVelocity(GLfloat value)
 {
     ang_velocity_ = value;
+}
+
+void camera::setPosition(glm::vec3 positionv)
+{
+    position_ = positionv;
+    relocateView ();
+}
+
+void camera::setDirection(glm::vec3 directionv)
+{
+    direction_ = directionv;
+    relocateView ();
 }

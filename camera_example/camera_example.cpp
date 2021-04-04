@@ -36,6 +36,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     (void)window;
     glViewport(0, 0, width, height);
+    
     // + для камеры
 }
 
@@ -43,13 +44,13 @@ int main()
 {
     // Initalize GLFW
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "DOORka", NULL, NULL);
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
+        glfwTerminate ();
         return 1;
     }     
     glfwMakeContextCurrent(window);
@@ -61,7 +62,7 @@ int main()
         return -1;
     }
 
-    // Compiling shader program
+    /* Compiling shader program
     unsigned int vshader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vshader, 1, &vshaderSource, NULL);
     glCompileShader(vshader);
@@ -92,16 +93,16 @@ int main()
     }
     glDeleteShader(vshader); // They are no longer needed, we already have a ready-to-use shader program
     glDeleteShader(fshader);
+    */
 
     // Make final initialization
-    
     sphere sfera(0.0, 0.0, 0.0, 1.0, 98, 100);
     camera cumera(window);
     init();
 
-    GLint colorVarLocation = glGetUniformLocation(shaderProgram, "requestedColor");
-    GLint viewVarLocation = glGetUniformLocation(shaderProgram, "view");
-    GLint perspVarLocation = glGetUniformLocation(shaderProgram, "perspective");
+    //GLint colorVarLocation = glGetUniformLocation(shaderProgram, "requestedColor");
+    //GLint viewVarLocation = glGetUniformLocation(shaderProgram, "view");
+    //GLint perspVarLocation = glGetUniformLocation(shaderProgram, "perspective");
 
     // Starting render loop
     while(!glfwWindowShouldClose(window)) {
@@ -109,11 +110,16 @@ int main()
         cumera.relocateView();
         glClear(GL_COLOR_BUFFER_BIT);
         // Getting the location of uniform variable with color vector
-        glUseProgram(shaderProgram);
+        //glUseProgram(shaderProgram);
         // Setting color
-        glUniform4f(colorVarLocation, 1.0f, 1.0f, 0.1f, 1.0f);
-        glUniformMatrix4fv(viewVarLocation, 1, GL_FALSE, glm::value_ptr(cumera.getViewMatrix()));
-        glUniformMatrix4fv(perspVarLocation, 1, GL_FALSE, glm::value_ptr(cumera.getPerspMatrix()));
+        //glUniform4f(colorVarLocation, 1.0f, 1.0f, 0.1f, 1.0f);
+        //glUniformMatrix4fv(viewVarLocation, 1, GL_FALSE, glm::value_ptr(cumera.getViewMatrix()));
+        //glUniformMatrix4fv(perspVarLocation, 1, GL_FALSE, glm::value_ptr(cumera.getPerspMatrix()));
+        glMatrixMode (GL_MODELVIEW);
+        glLoadMatrixf (glm::value_ptr(cumera.getViewMatrix()));
+        glMatrixMode (GL_PROJECTION);
+        glLoadMatrixf (glm::value_ptr(cumera.getPerspMatrix()));
+        glColor3f (1.0f, 1.0f, 0.1f);
         sfera.draw();
         cumera.acquireDeltaTime();
         glfwSwapBuffers(window);
