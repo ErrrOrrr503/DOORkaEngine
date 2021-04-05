@@ -88,7 +88,7 @@ int main()
     glGetShaderiv(vshader, GL_COMPILE_STATUS, &success);
     if(!success) {
         glGetShaderInfoLog(vshader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cerr << "Vertex shader compilation failed:\n" << infoLog << std::endl;
     }
     unsigned int fshader;
     fshader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -97,7 +97,7 @@ int main()
     glGetShaderiv(fshader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fshader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cerr << "Fragment shader compilation failed:\n" << infoLog << std::endl;
     }
     unsigned shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vshader);
@@ -106,7 +106,7 @@ int main()
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cerr << "Shader program linking failed\n" << infoLog << std::endl;
     }
     glDeleteShader(vshader); // They are no longer needed, we already have a ready-to-use shader program
     glDeleteShader(fshader);
@@ -123,6 +123,7 @@ int main()
     glfwSetCursorPosCallback(window, cursor_callback);
     g_cumera->setMouseSensitivity(0.005f);
 #ifdef DE_SET_VIM_MODE
+    // Seiing camera movement to hjkl like vim cursor movement.
     g_cumera->setControls(camera::key_container(
         GLFW_KEY_UP, GLFW_KEY_DOWN,  GLFW_KEY_LEFT, GLFW_KEY_RIGHT,
         GLFW_KEY_J, GLFW_KEY_K, GLFW_KEY_H, GLFW_KEY_L
@@ -135,7 +136,7 @@ int main()
         g_cumera->relocateView();
         glClear(GL_COLOR_BUFFER_BIT);
 #ifdef DE_USE_SHADERS
-        // Getting the location of uniform variable with color vector
+        // Selecting shader program
         glUseProgram(shaderProgram);
         // Setting color
         glUniform4f(colorVarLocation, 1.0f, 1.0f, 0.1f, 1.0f);
