@@ -3,3 +3,8 @@ v 0.1E-9
 
 A pseudo-engine utilized to implenent DOOR game.
 
+to compile engine use:
+**g++ -Wall -Wextra -lGLEW -lglfw -lGL -lpthread -o render_test.exe ./main.cpp ./render/render.cpp ./camera/camera.cpp ./level/level_common.cpp ./level/level_engine.cpp ./camera_example/sphere.cpp**
+
+to compile editor use qmake or qtCreator
+

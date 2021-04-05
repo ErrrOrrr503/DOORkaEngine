@@ -38,14 +38,14 @@ private:
     // Camera position variables
     glm::vec3 position_ = glm::vec3(0.0f, 0.0f, 0.1f);
     glm::vec3 direction_ = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cam_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 cam_up_ = glm::vec3(0.0f, 0.0f, 1.0f);
     GLfloat course_ = 0.0f;
     GLfloat pitch_ = 0.0f;
     bool keyboard_rotation_enabled_ = false;
     const GLfloat MIN_ANGLE = 1e-5f;
     GLfloat mouse_sensitivity_ = 0.01f;
     // Camera velocity in unit/sec
-    GLfloat lin_velocity_ = 2.0f;
+    GLfloat lin_velocity_ = 4.0f;
     GLfloat ang_velocity_ = 2.0f;
     // Timing variables
     GLdouble elapsed_time_ = 0.0f;
@@ -53,9 +53,9 @@ private:
     // Projection matrix
     glm::mat4 perspective_ = glm::mat4();
     // Perspective view parameters
-    GLfloat field_of_view_ = glm::radians(45.0f);
+    GLfloat field_of_view_ = glm::radians(70.0f);
     GLfloat near_clipping_plane_ = 0.1f;
-    GLfloat far_clipping_plane_ = 100.0f;
+    GLfloat far_clipping_plane_ = 1000.0f;
     key_container keys_;
 
 public:

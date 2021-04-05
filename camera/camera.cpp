@@ -32,10 +32,10 @@ void camera::relocateView()
 {
     if (glfwGetKey(window_, keys_.mv_fwd) == GLFW_PRESS)
         position_ += lin_velocity_ * (GLfloat)elapsed_time_
-        * glm::vec3(sinf(course_), 0.0f, -cosf(course_));
+        * glm::vec3(sinf(course_), -cosf(course_), 0.0f);
     if (glfwGetKey(window_, keys_.mv_bck) == GLFW_PRESS)
         position_ -= lin_velocity_ * (GLfloat)elapsed_time_
-        * glm::vec3(sinf(course_), 0.0f, -cosf(course_));
+        * glm::vec3(sinf(course_), -cosf(course_), 0.0f);
     if (glfwGetKey(window_, keys_.mv_left) == GLFW_PRESS)
         position_ -= glm::normalize(glm::cross(direction_, cam_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
@@ -68,9 +68,9 @@ void camera::relocateView()
 
     direction_ = glm::vec3(
         sinf(course_) * cosf(pitch_),
-        sinf(pitch_),
-        -cosf(course_) * cosf(pitch_)
-    ); 
+        cosf(course_) * cosf(pitch_),
+        sinf(pitch_)
+    );
 }
 
 glm::mat4 camera::getViewMatrix()
