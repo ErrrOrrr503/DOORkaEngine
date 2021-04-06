@@ -1,6 +1,8 @@
 #ifndef RENDER_H
 #define RENDER_H
 
+#define GLEW_STATIC
+
 #include "../camera/camera.h"
 #include "../level/level_engine.h"
 #include <GL/glew.h>

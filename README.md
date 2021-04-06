@@ -8,3 +8,11 @@ to compile engine use:
 
 to compile editor use qmake or qtCreator
 
+for windows don't use mingw, linking with glew and glfw is somehow broken, use cmake and MSVC >=142 (visual studio 2019):
+**mkdir build**
+**cd build**
+**cmake ../**
+**$MSBUILD.EXE engine.sln**
+
+Now engine.exe for win32 is in build/Debug directory
+
