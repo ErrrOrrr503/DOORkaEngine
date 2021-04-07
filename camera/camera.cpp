@@ -30,34 +30,39 @@ void camera::resetWindowSize(GLint width, GLint height)
 
 void camera::relocateView()
 {
-    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS)
+    if (glfwGetKey(window_, keys_.mv_fwd) == GLFW_PRESS)
         position_ += lin_velocity_ * (GLfloat)elapsed_time_
-        * glm::vec3(direction_.x, direction_.y, 0);
-    if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS)
+        * glm::vec3(sinf(course_), -cosf(course_), 0.0f);
+    if (glfwGetKey(window_, keys_.mv_bck) == GLFW_PRESS)
         position_ -= lin_velocity_ * (GLfloat)elapsed_time_
-        * glm::vec3(direction_.x, direction_.y, 0);;
-    if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS)
+        * glm::vec3(sinf(course_), -cosf(course_), 0.0f);
+    if (glfwGetKey(window_, keys_.mv_left) == GLFW_PRESS)
         position_ -= glm::normalize(glm::cross(direction_, cam_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
-    if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS)
+    if (glfwGetKey(window_, keys_.mv_right) == GLFW_PRESS)
         position_ += glm::normalize(glm::cross(direction_, cam_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
-    if (glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    
+    if (!keyboard_rotation_enabled_)
+        return;
+    
+    // else process rotation with keyboard and compute direction vector
+    if (glfwGetKey(window_, keys_.rot_left) == GLFW_PRESS) {
         course_ -= ang_velocity_ * (GLfloat)elapsed_time_;
         if (course_ < -M_PI)
             course_ += M_PI + M_PI;
     }
-    if (glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    if (glfwGetKey(window_, keys_.rot_right) == GLFW_PRESS) {
         course_ += ang_velocity_ * (GLfloat)elapsed_time_;
         if (course_ > M_PI)
             course_ -= M_PI + M_PI;
     }
-    if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
-        if (pitch_ < M_PI_2)
+    if (glfwGetKey(window_, keys_.rot_up) == GLFW_PRESS) {
+        if (pitch_ < M_PI_2 - MIN_ANGLE)
             pitch_ += ang_velocity_ * (GLfloat)elapsed_time_;
     }
-    if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        if (pitch_ > -M_PI_2)
+    if (glfwGetKey(window_, keys_.rot_down) == GLFW_PRESS) {
+        if (pitch_ > -M_PI_2 + MIN_ANGLE)
             pitch_ -= ang_velocity_ * (GLfloat)elapsed_time_;
     }
 
@@ -66,12 +71,11 @@ void camera::relocateView()
         cosf(course_) * cosf(pitch_),
         sinf(pitch_)
     );
-    view_ = glm::lookAt(position_, position_ + direction_, cam_up_);
 }
 
 glm::mat4 camera::getViewMatrix()
 {
-    return view_;
+    return glm::lookAt(position_, position_ + direction_, cam_up_);
 }
 
 glm::mat4 camera::getPerspMatrix()
@@ -136,11 +140,69 @@ void camera::setAngularVelocity(GLfloat value)
 void camera::setPosition(glm::vec3 positionv)
 {
     position_ = positionv;
-    relocateView ();
+    relocateView();
 }
 
 void camera::setDirection(glm::vec3 directionv)
 {
     direction_ = directionv;
-    relocateView ();
+    relocateView();
+}
+
+void camera::setMouseSensitivity(GLfloat value)
+{
+    mouse_sensitivity_ = value;
+}
+
+void camera::rotateViewMouse(GLfloat x_cursor_offset, GLfloat y_cursor_offset)
+{
+    course_ += x_cursor_offset * mouse_sensitivity_;
+    pitch_ -= y_cursor_offset * mouse_sensitivity_;
+    if (pitch_ > M_PI_2 - MIN_ANGLE)
+        pitch_ = M_PI_2 - MIN_ANGLE;
+    if (pitch_ < -M_PI_2 + MIN_ANGLE)
+        pitch_ = -M_PI_2 + MIN_ANGLE;
+    
+    direction_ = glm::vec3(
+        sinf(course_) * cosf(pitch_),
+        sinf(pitch_),
+        -cosf(course_) * cosf(pitch_)
+    );
+}
+
+void camera::enableKeyboardRotation(bool state)
+{
+    keyboard_rotation_enabled_ = state;
+}
+
+camera::key_container::key_container() :
+    rot_up(GLFW_KEY_UP),
+    rot_down(GLFW_KEY_DOWN),
+    rot_left(GLFW_KEY_LEFT),
+    rot_right(GLFW_KEY_RIGHT),
+    mv_fwd(GLFW_KEY_W),
+    mv_bck(GLFW_KEY_S),
+    mv_left(GLFW_KEY_A),
+    mv_right(GLFW_KEY_D)
+{
+}
+
+camera::key_container::key_container(
+    GLint r_up, GLint r_down, GLint r_left, GLint r_right, 
+    GLint m_fwd, GLint m_bck, GLint m_left, GLint m_right
+) :
+    rot_up(r_up),
+    rot_down(r_down),
+    rot_left(r_left),
+    rot_right(r_right),
+    mv_fwd(m_fwd),
+    mv_bck(m_bck),
+    mv_left(m_left),
+    mv_right(m_right)
+{
+}
+
+void camera::setControls(const camera::key_container& keys)
+{
+    keys_ = keys;
 }

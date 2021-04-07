@@ -1,6 +1,5 @@
 /*
- * This example draws a polygonal sphere using GLSL shaders.
- * Also sets esc key to close the window.
+ * This example draws a polygonal sphere and sets up camera class for further use.
  */
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,11 +11,22 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "../camera/camera.h"
 
+#ifdef DE_USE_SHADERS
 #include "shader_source"
+#endif
 
 // Window size constants
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
+
+// Main camera object
+// It should be private object of our engine class
+static camera* g_cumera;
+
+// Last cursor position
+// They should be private objects of our engine class
+static GLdouble g_lastx = SCR_WIDTH / 2;
+static GLdouble g_lasty = SCR_HEIGHT / 2;
 
 void init()
 {
@@ -36,8 +46,15 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     (void)window;
     glViewport(0, 0, width, height);
-    
-    // + для камеры
+    g_cumera->resetWindowSize(width, height);
+}
+
+void cursor_callback(GLFWwindow* window, GLdouble xpos, GLdouble ypos)
+{
+    (void)window;
+    g_cumera->rotateViewMouse(xpos - g_lastx, ypos - g_lasty);
+    g_lastx = xpos;
+    g_lasty = ypos;
 }
 
 int main()
@@ -46,7 +63,6 @@ int main()
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "DOORka", NULL, NULL);
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -62,7 +78,8 @@ int main()
         return -1;
     }
 
-    /* Compiling shader program
+#ifdef DE_USE_SHADERS
+    // Compiling shader program
     unsigned int vshader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vshader, 1, &vshaderSource, NULL);
     glCompileShader(vshader);
@@ -71,7 +88,7 @@ int main()
     glGetShaderiv(vshader, GL_COMPILE_STATUS, &success);
     if(!success) {
         glGetShaderInfoLog(vshader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cerr << "Vertex shader compilation failed:\n" << infoLog << std::endl;
     }
     unsigned int fshader;
     fshader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -80,7 +97,7 @@ int main()
     glGetShaderiv(fshader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fshader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cerr << "Fragment shader compilation failed:\n" << infoLog << std::endl;
     }
     unsigned shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vshader);
@@ -89,44 +106,58 @@ int main()
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cerr << "Shader program linking failed\n" << infoLog << std::endl;
     }
     glDeleteShader(vshader); // They are no longer needed, we already have a ready-to-use shader program
     glDeleteShader(fshader);
-    */
+    GLint colorVarLocation = glGetUniformLocation(shaderProgram, "requestedColor");
+    GLint viewVarLocation = glGetUniformLocation(shaderProgram, "view");
+    GLint perspVarLocation = glGetUniformLocation(shaderProgram, "perspective");
+#endif
 
     // Make final initialization
     sphere sfera(0.0, 0.0, 0.0, 1.0, 98, 100);
-    camera cumera(window);
+    g_cumera = new camera(window);
     init();
-
-    //GLint colorVarLocation = glGetUniformLocation(shaderProgram, "requestedColor");
-    //GLint viewVarLocation = glGetUniformLocation(shaderProgram, "view");
-    //GLint perspVarLocation = glGetUniformLocation(shaderProgram, "perspective");
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, cursor_callback);
+    g_cumera->setMouseSensitivity(0.005f);
+#ifdef DE_SET_VIM_MODE
+    // Seiing camera movement to hjkl like vim cursor movement.
+    g_cumera->setControls(camera::key_container(
+        GLFW_KEY_UP, GLFW_KEY_DOWN,  GLFW_KEY_LEFT, GLFW_KEY_RIGHT,
+        GLFW_KEY_J, GLFW_KEY_K, GLFW_KEY_H, GLFW_KEY_L
+    ));
+#endif
 
     // Starting render loop
     while(!glfwWindowShouldClose(window)) {
         processInput(window);
-        cumera.relocateView();
+        g_cumera->relocateView();
         glClear(GL_COLOR_BUFFER_BIT);
-        // Getting the location of uniform variable with color vector
-        //glUseProgram(shaderProgram);
+#ifdef DE_USE_SHADERS
+        // Selecting shader program
+        glUseProgram(shaderProgram);
         // Setting color
-        //glUniform4f(colorVarLocation, 1.0f, 1.0f, 0.1f, 1.0f);
-        //glUniformMatrix4fv(viewVarLocation, 1, GL_FALSE, glm::value_ptr(cumera.getViewMatrix()));
-        //glUniformMatrix4fv(perspVarLocation, 1, GL_FALSE, glm::value_ptr(cumera.getPerspMatrix()));
+        glUniform4f(colorVarLocation, 1.0f, 1.0f, 0.1f, 1.0f);
+        // Loading transform matrices into GPU shader program
+        glUniformMatrix4fv(viewVarLocation, 1, GL_FALSE, glm::value_ptr(g_cumera->getViewMatrix()));
+        glUniformMatrix4fv(perspVarLocation, 1, GL_FALSE, glm::value_ptr(g_cumera->getPerspMatrix()));
+#else
         glMatrixMode (GL_MODELVIEW);
-        glLoadMatrixf (glm::value_ptr(cumera.getViewMatrix()));
+        glLoadMatrixf (glm::value_ptr(g_cumera->getViewMatrix()));
         glMatrixMode (GL_PROJECTION);
-        glLoadMatrixf (glm::value_ptr(cumera.getPerspMatrix()));
+        glLoadMatrixf (glm::value_ptr(g_cumera->getPerspMatrix()));
         glColor3f (1.0f, 1.0f, 0.1f);
+#endif
         sfera.draw();
-        cumera.acquireDeltaTime();
+        g_cumera->acquireDeltaTime();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     // Cleaning up before leaving
+    delete g_cumera;
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
