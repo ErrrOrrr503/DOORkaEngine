@@ -129,7 +129,7 @@ void oGL_out::wheelEvent(QWheelEvent *me)
 
 void oGL_out::mouseReleaseEvent(QMouseEvent *me)
 {
-
+    Q_UNUSED(me);
 }
 
 void oGL_out::ogl_change_mode (edit_mode in_mode)
@@ -190,15 +190,15 @@ void oGL_out::level_paint()
     f30->glColor3f (0.0, 0.4, 0.7);
     f30->glBegin (GL_LINES);
     for (size_t i = 0; i < level->walls.size (); i++) {
-        glVertex2f(level->walls[i].a1[0], level->walls[i].a1[1]);
-        glVertex2f(level->walls[i].a2[0], level->walls[i].a2[1]);
+        glVertex2f(level->walls[i].x1, level->walls[i].y1);
+        glVertex2f(level->walls[i].x2, level->walls[i].y2);
     }
     f30->glEnd ();
     f30->glLineWidth (3);
     f30->glColor3f (0.4, 0.8, 0);
     f30->glBegin (GL_LINES);
-    glVertex2f (level->selected_wall.a1[0], level->selected_wall.a1[1]);
-    glVertex2f (level->selected_wall.a2[0], level->selected_wall.a2[1]);
+    glVertex2f (level->selected_wall.x1, level->selected_wall.y1);
+    glVertex2f (level->selected_wall.x2, level->selected_wall.y2);
     f30->glEnd ();
 }
 

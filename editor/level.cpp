@@ -1,27 +1,19 @@
 #include "level.h"
 
-Level::Level()
-{
-
-}
-
 void Level::select_wall (float x, float y)
 {
-    const float delta = 10;
-    if (x - round (x / cell_size) * cell_size < delta && x - round (x / cell_size) * cell_size > - delta) {
-        selected_wall.a1[0] = selected_wall.a2[0] = round (x / cell_size) * cell_size;
-        selected_wall.a1[1] = floor (y / cell_size) * cell_size;
-        selected_wall.a2[1] = (floor (y / cell_size) + 1) * cell_size;
+    if (x - round (x / cell_size) * cell_size < delta_ && x - round (x / cell_size) * cell_size > - delta_) {
+        selected_wall.x1 = selected_wall.x2 = round (x / cell_size) * cell_size;
+        selected_wall.y1 = floor (y / cell_size) * cell_size;
+        selected_wall.y2 = (floor (y / cell_size) + 1) * cell_size;
     }
-    if (y - round (y / cell_size) * cell_size < delta && y - round (y / cell_size) * cell_size > - delta) {
-        selected_wall.a1[1] = selected_wall.a2[1] = round (y / cell_size) * cell_size;
-        selected_wall.a1[0] = floor (x / cell_size) * cell_size;
-        selected_wall.a2[0] = (floor (x / cell_size) + 1) * cell_size;
+    if (y - round (y / cell_size) * cell_size < delta_ && y - round (y / cell_size) * cell_size > - delta_) {
+        selected_wall.y1 = selected_wall.y2 = round (y / cell_size) * cell_size;
+        selected_wall.x1 = floor (x / cell_size) * cell_size;
+        selected_wall.x2 = (floor (x / cell_size) + 1) * cell_size;
     }
-    selected_wall.a1[2] = selected_wall.a1[2] = 0;
-    selected_wall.a1[3] = selected_wall.a1[3] = DEF_WALL_HEIGHT;
-    selected_wall.a2[2] = selected_wall.a2[2] = 0;
-    selected_wall.a2[3] = selected_wall.a2[3] = DEF_WALL_HEIGHT;
+    selected_wall.zlo1 = selected_wall.zlo2 = 0;
+    selected_wall.zhi1 = selected_wall.zhi2 = DEF_WALL_HEIGHT;
 }
 
 void Level::add_wall ()
@@ -38,11 +30,19 @@ void Level::delete_wall ()
     walls.erase (walls.begin () + pos);
 }
 
-int Level::wall_is_present (wall wall)
+void Level::delete_wall (const wall& wall)
+{
+    int pos = wall_is_present (wall);
+    if (pos < 0)
+        return;
+    walls.erase (walls.begin () + pos);
+}
+
+int Level::wall_is_present (const wall& wall)
 {
     for (size_t i = 0; i < walls.size (); i++) {
-        if (walls[i].a1[0] == wall.a1[0] && walls[i].a1[1] == wall.a1[1] &&
-            walls[i].a2[0] == wall.a2[0] && walls[i].a2[1] == wall.a2[1])
+        if (walls[i].x1 == wall.x1 && walls[i].y1 == wall.y1 &&
+            walls[i].x2 == wall.x2 && walls[i].y2 == wall.y2)
             return i;
     }
     return -1;
@@ -76,4 +76,9 @@ int Level::load_level (std::ifstream &infile)
     emit print_console ("loading " + std::to_string (walls.size () * sizeof (wall)) + " bytes to walls[]");
     selected_wall = {};
     return ret;
+}
+
+void Level::set_delta (float value)
+{
+    this->delta_ = value;
 }

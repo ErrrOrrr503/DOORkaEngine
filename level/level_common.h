@@ -1,20 +1,28 @@
 #ifndef LEVEL_COMMON_H
 #define LEVEL_COMMON_H
-
+//! \file level_common.h
 #include <cinttypes>
 #include <vector>
 #include <fstream>
 #include <cstring>
-
-/* file structure (in binary):
-   <level_header><wall_section><other>
+/*!
+ * \details Description file for level storage format.
+ * Covers both file format and its representation in editor program.
+ * file structure (in binary):
+ *     <level_header><wall_section><other>
 */
+
+//! Describe pls.
 #define FILETYPE_DESCR_LEN 16
 
 //<ERROR_CODES>
+//! Describe pls.
 #define ERR_FILETYPE -1
+//! Describe pls.
 #define ERR_VERSION 1
+//! Describe pls.
 #define ERR_FILEOPEN 2
+//! Describe pls.
 //</ERROR_CODES>
 
 //<LEVEL_DIMENSIONS for coordinate system>
@@ -34,12 +42,30 @@ struct level_fileheader {
     uint64_t other_size;
 };
 
+/*!
+ * \brief The wall struct
+ * \details Holds properties of a wall as a single object.
+ * In other words, it describes both of wall's visible sides.
+ * x1, y1, - coordinates of {point with smaller x and smaller y coordinates? correct if I'm wrong}
+ * x2, y2 - bigger coordinates.
+ * zlow, zhi - bottom and top z coordinates of a wall.
+ * For now zlow1 = zlow2, zhi1 = zhi2 - these should be equal.
+ * color - color vector that will be displayes if no texture loaded.
+ */
 struct wall {
-    float a1[4]; // x y zlow zhigh
-    float a2[4];
+    float x1, y1, zlo1, zhi1;
+    float x2, y2, zlo2, zhi2;
     float color[3] = {DEF_WALL_COLOR_R, DEF_WALL_COLOR_G, DEF_WALL_COLOR_B};
 };
 
+/*!
+ * \brief Read file and load level data into memory.
+ * \param walls Walls vecror where walls data is stored.
+ * \param infile Input file stream.
+ * \return 0 or non-zero error code.
+ * \details Walls vector should be initialized but not necessarily pre-allocated.
+ * If stored, all data in the vector will be destroyed and replaced by level data.
+ */
 int load_level_common (std::vector<wall> &walls, std::ifstream &infile);
 
 #endif // LEVEL_COMMON_H
