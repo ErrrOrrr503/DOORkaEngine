@@ -169,3 +169,11 @@ void MainWindow::on_opendialog_finish(const std::string &filename, flag_saveload
         ogl_out->update ();
     }
 }
+
+void MainWindow::on_trig_sideButton_clicked()
+{
+    if (level.trig_side_mode == both_sides)
+        level.trig_side_mode = one_side;
+    else
+        level.trig_side_mode = both_sides;
+}

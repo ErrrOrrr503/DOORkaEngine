@@ -2,7 +2,12 @@
 
 int load_level_common (std::vector<wall> &walls, std::ifstream &infile)
 {
-    level_fileheader fileheader;
+    level_fileheader temp;
+    return load_level_common (temp, walls, infile);
+}
+
+int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::ifstream &infile)
+{
     fileheader.filetype[0] = 0;
     level_fileheader reference_fileheader;
     infile.read ((char *) &fileheader, sizeof (level_fileheader));

@@ -153,6 +153,19 @@
            <string>TextLabel</string>
           </property>
          </widget>
+         <widget class="QPushButton" name="trig_sideButton">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>90</y>
+            <width>80</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>trig_side</string>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>

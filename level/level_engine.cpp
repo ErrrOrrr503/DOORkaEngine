@@ -6,16 +6,6 @@ Level::Level ()
 
 }
 
-int Level::wall_is_present (wall wall)
-{
-    for (size_t i = 0; i < walls.size (); i++) {
-        if (walls[i].a1[0] == wall.a1[0] && walls[i].a1[1] == wall.a1[1] &&
-            walls[i].a2[0] == wall.a2[0] && walls[i].a2[1] == wall.a2[1])
-            return i;
-    }
-    return -1;
-}
-
 int Level::load_level (const char *filename)
 {
     std::ifstream infile;

@@ -2,7 +2,7 @@
 
 Cursor::Cursor()
 {
-    type_ = none;
+    type = none;
     cur_x = 0;
     cur_y = 0;
 }

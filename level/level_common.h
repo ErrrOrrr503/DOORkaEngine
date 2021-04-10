@@ -13,7 +13,7 @@
 */
 
 //! Describe pls.
-#define FILETYPE_DESCR_LEN 16
+#define FILETYPE_DESCR_LEN 20
 
 //<ERROR_CODES>
 //! Describe pls.
@@ -36,25 +36,30 @@
 //</LEVEL_DIMENSIONS for coordinate system>
 
 struct level_fileheader {
-    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v0";
-    uint32_t version = 0;
+//common data:
+    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00001";
+    uint32_t version = 1;
     uint64_t walls_size; // in bytes
     uint64_t other_size;
+//editor only data:
+    float prev_x = 0, prev_y = 0;
+    float prev_prev_x = 0, prev_prev_y = 0;
+    float prev_prev_prev_x = 0, prev_prev_prev_y = 0;
 };
 
 /*!
  * \brief The wall struct
  * \details Holds properties of a wall as a single object.
  * In other words, it describes both of wall's visible sides.
- * x1, y1, - coordinates of {point with smaller x and smaller y coordinates? correct if I'm wrong}
+ * x1, y1, - coordinates of {point with smaller x and smaller y coordinates? correct if I'm wrong} Correction: only with smaller x is possible
  * x2, y2 - bigger coordinates.
  * zlow, zhi - bottom and top z coordinates of a wall.
  * For now zlow1 = zlow2, zhi1 = zhi2 - these should be equal.
  * color - color vector that will be displayes if no texture loaded.
  */
 struct wall {
-    float x1, y1, zlo1, zhi1;
-    float x2, y2, zlo2, zhi2;
+    float x1 = 0, y1 = 0, zlo1 = 0, zhi1 = DEF_WALL_HEIGHT;
+    float x2 = 0, y2 = 0, zlo2 = 0, zhi2 = DEF_WALL_HEIGHT;
     float color[3] = {DEF_WALL_COLOR_R, DEF_WALL_COLOR_G, DEF_WALL_COLOR_B};
 };
 
@@ -67,5 +72,6 @@ struct wall {
  * If stored, all data in the vector will be destroyed and replaced by level data.
  */
 int load_level_common (std::vector<wall> &walls, std::ifstream &infile);
+int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::ifstream &infile);
 
 #endif // LEVEL_COMMON_H

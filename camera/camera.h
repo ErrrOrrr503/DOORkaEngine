@@ -138,12 +138,20 @@ public:
      */
     void setPosition(glm::vec3 positionv);
     /*!
+     * @brief Get camera position.
+     */
+    glm::vec3 getPosition();
+    /*!
      * @brief Set new view direction.
      * @param directionv New direction vector
      * @details Warning! This function does not calculate new angle used in view rotation.
      * Do not use it with enabled rotation control, there will be errors.
      */
     void setDirection(glm::vec3 directionv);
+    /*!
+     * @brief Get view direction.
+     */
+    glm::vec3 getDirection();
     /*!
      * Enable or disable view rotation with keyboard.
      * @param state True to enable, false to disable

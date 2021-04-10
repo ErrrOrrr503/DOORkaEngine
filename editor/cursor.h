@@ -13,10 +13,10 @@ enum cursor_type {
 
 class Cursor
 {
-    cursor_type type_;
 public:
     Cursor();
     ~Cursor() = default;
+    cursor_type type;
     void set (float x_raw, float y_raw, float height, float width, float center_x, float center_y, float angle, float scale);
     void antirotate (float angle);
     void antiscale (float scale);

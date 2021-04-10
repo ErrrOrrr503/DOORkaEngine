@@ -15,6 +15,27 @@
 #include "cursor.h"
 #include "level.h"
 
+#define BACKGROUND_COLOR_R 0.2
+#define BACKGROUND_COLOR_G 0.2
+#define BACKGROUND_COLOR_B 0.2
+
+#define GRID_COLOR_R 0.2
+#define GRID_COLOR_G 0.3
+#define GRID_COLOR_B 0.3
+
+#define WALL_COLOR_R 0.0
+#define WALL_COLOR_G 0.6
+#define WALL_COLOR_B 0.0
+
+#define SELECTED_WALL_COLOR_R 0.0
+#define SELECTED_WALL_COLOR_G 0.4
+#define SELECTED_WALL_COLOR_B 0.7
+
+#define FUTURE_WALL_COLOR_R 0.8
+#define FUTURE_WALL_COLOR_G 0.3
+#define FUTURE_WALL_COLOR_B 0.0
+
+
 class oGL_out : public QOpenGLWidget
 {
     Q_OBJECT
@@ -57,6 +78,8 @@ private:
     float z_angle;
     float scale;
     Cursor cursor;
+    const int angle_step = 3;
+    bool flag_mouse_is_pressed = 0;
 };
 
 #endif // OGL_OUT_H

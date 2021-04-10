@@ -33,8 +33,9 @@ private slots:
     void on_actionSave_triggered();
     void on_actionLoad_triggered();
     void on_opendialog_finish(const std::string &filename, flag_saveload flag);
-
     void on_actionDelete_wall_triggered();
+
+    void on_trig_sideButton_clicked();
 
 signals:
     void ogl_change_mode (edit_mode in_mode);

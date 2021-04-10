@@ -11,6 +11,7 @@ oGL_out::oGL_out(QWidget *parent, Level *in_level) : QOpenGLWidget(parent)
     scale = 1;
     level = in_level;
     setFocusPolicy(Qt::ClickFocus);
+    setMouseTracking(true);
 }
 
 oGL_out::~oGL_out()
@@ -73,13 +74,16 @@ void oGL_out::paintGL()
 
 void oGL_out::keyPressEvent(QKeyEvent *ke)
 {
-    const int angle_step = 3;
+    //swap_triangle is here as focus is on the widget, not on mainwindow
     switch (ke->key()) {
     case Qt::Key_Right:
         z_angle += angle_step;
         break;
     case Qt::Key_Left:
         z_angle -= angle_step;
+        break;
+    case Qt::Key_Space:
+        level->swap_triangle_sides ();
         break;
     default:
         break;
@@ -92,22 +96,28 @@ void oGL_out::keyPressEvent(QKeyEvent *ke)
 
 void oGL_out::mouseMoveEvent(QMouseEvent *me)
 {
-    center_x = old_center_x - me->localPos().x() + cursor.pressed_x_raw;
-    center_y = old_center_y + me->localPos().y() - cursor.pressed_y_raw;
-    QResizeEvent *myResizeEvent = new QResizeEvent(QSize(size()), QSize(size())); //call resize staff that places center where needed
-    QCoreApplication::postEvent(this, myResizeEvent);
+    if (flag_mouse_is_pressed) {
+        center_x = old_center_x - me->localPos().x() + cursor.pressed_x_raw;
+        center_y = old_center_y + me->localPos().y() - cursor.pressed_y_raw;
+        QResizeEvent *myResizeEvent = new QResizeEvent(QSize(size()), QSize(size())); //call resize staff that places center where needed
+        QCoreApplication::postEvent(this, myResizeEvent);
+    }
+    else {
+        cursor.set(me->localPos().x(), me->localPos().y(), height(), width(), center_x, center_y, z_angle, scale);
+    }
     update ();
 }
 
 void oGL_out::mousePressEvent(QMouseEvent *me)
 {
+    flag_mouse_is_pressed = 1;
     if (cursor.type == none)
         cursor.type = plain;
     cursor.set(me->localPos().x(), me->localPos().y(), height(), width(), center_x, center_y, z_angle, scale);
-    if (cursor.type == sel_mode || cursor.type == draw_mode)
+    if (cursor.type == sel_mode)
         level->select_wall(cursor.cur_x, cursor.cur_y);
     if (cursor.type == draw_mode)
-        level->add_wall();
+        level->add_wall_trio (cursor.cur_x, cursor.cur_y);
     update();
 #ifdef DEBUG_DRAW
     emit print_console("mouse pointed to x = " + std::to_string(cursor.cur_x) + " y = " + std::to_string(cursor.cur_y));
@@ -130,6 +140,7 @@ void oGL_out::wheelEvent(QWheelEvent *me)
 void oGL_out::mouseReleaseEvent(QMouseEvent *me)
 {
     Q_UNUSED(me);
+    flag_mouse_is_pressed = 0;
 }
 
 void oGL_out::ogl_change_mode (edit_mode in_mode)
@@ -171,10 +182,10 @@ void oGL_out::pointers_paint()
 
 void oGL_out::level_paint()
 {
-    f30->glClearColor (0.2, 0.2, 0.2, 0.0);
+    f30->glClearColor (BACKGROUND_COLOR_R, BACKGROUND_COLOR_G, BACKGROUND_COLOR_B, 0.0);
     f30->glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     f30->glLineWidth (1);
-    f30->glColor3f (0, 0.6, 0);
+    f30->glColor3f (GRID_COLOR_R, GRID_COLOR_G, GRID_COLOR_B);
     f30->glBegin (GL_LINES);
     for (float i = -level->level_x; i < level->level_x; i += level->cell_size) {
         glVertex2f (i, -level->level_y);
@@ -186,16 +197,30 @@ void oGL_out::level_paint()
     }
     f30->glEnd ();
 
-    f30->glLineWidth (3);
-    f30->glColor3f (0.0, 0.4, 0.7);
+    f30->glLineWidth (2);
+    f30->glColor3f (WALL_COLOR_R, WALL_COLOR_G, WALL_COLOR_B);
+    f30->glEnable (GL_LINE_STIPPLE);
+    f30->glLineStipple (1, 0xF0F0);
     f30->glBegin (GL_LINES);
     for (size_t i = 0; i < level->walls.size (); i++) {
-        glVertex2f(level->walls[i].x1, level->walls[i].y1);
-        glVertex2f(level->walls[i].x2, level->walls[i].y2);
+        f30->glVertex2f(level->walls[i].x1, level->walls[i].y1);
+        f30->glVertex2f(level->walls[i].x2, level->walls[i].y2);
     }
     f30->glEnd ();
+
+    if (cursor.type == draw_mode) {
+        f30->glColor3f (FUTURE_WALL_COLOR_R, FUTURE_WALL_COLOR_G, FUTURE_WALL_COLOR_B);
+        f30->glBegin (GL_LINES);
+            f30->glVertex2f (level->prev_x, level->prev_y);
+            f30->glVertex2f (cursor.cur_x, cursor.cur_y);
+            f30->glVertex2f (level->prev_prev_x, level->prev_prev_y);
+            f30->glVertex2f (cursor.cur_x, cursor.cur_y);
+        f30->glEnd ();
+    }
+    f30->glDisable (GL_LINE_STIPPLE);
+
     f30->glLineWidth (3);
-    f30->glColor3f (0.4, 0.8, 0);
+    f30->glColor3f (SELECTED_WALL_COLOR_R, SELECTED_WALL_COLOR_G, SELECTED_WALL_COLOR_B);
     f30->glBegin (GL_LINES);
     glVertex2f (level->selected_wall.x1, level->selected_wall.y1);
     glVertex2f (level->selected_wall.x2, level->selected_wall.y2);

@@ -37,7 +37,9 @@ public:
 
 private:
     void draw_gl12 ();
-    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+    static void framebuffer_size_callback (GLFWwindow* window, int width, int height);
+    static void cursor_callback (GLFWwindow* window, GLdouble xpos, GLdouble ypos);
+    static void misc_keyboard_input (GLFWwindow *window, int key, int scancode, int action, int mods);
 
     render_status_type status_ = ok;
     render_draw_mode draw_mode_ = gl12;

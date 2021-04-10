@@ -6,9 +6,20 @@
 #include <QObject>
 #include <fstream>
 #include "../level/level_common.h"
+
 enum edit_mode {
     sel,
     draw
+};
+
+enum triangle_side_mode {
+    both_sides, //default
+    one_side
+};
+
+struct dot {
+    float x;
+    float y;
 };
 
 /*!
@@ -18,7 +29,7 @@ enum edit_mode {
 class Level : public QObject
 {
     Q_OBJECT //just for using signal to access console
-    float delta_ = 10.0f;
+    float delta_ = 20.0f;
 public:
     //! \brief Default constructor.
     Level() = default;
@@ -33,7 +44,7 @@ public:
     /*!
      * \brief Push the wall in the selected_wall buffer into walls vector.
      */
-    void add_wall ();
+    void add_wall_trio (float x, float y);
     /*!
      * \brief Delete selected wall from the walls vector.
      */
@@ -61,6 +72,11 @@ public:
      * \details Seee select_wall for further reference.
      */
     void set_delta (float value);
+    /*!
+     * \brief swaps triangle base for new triangle
+     * \details swaps prev and prev_prev_prev
+     */
+    void swap_triangle_sides ();
 
     //! Vector where all level wall objects are stored. Unsorted.
     std::vector<wall> walls;
@@ -68,15 +84,24 @@ public:
      * \brief Buffer for a selected wall data.
      * \details The selected wall may or may not be in walls vector.
      */
-    wall selected_wall;
+    wall selected_wall = {};
     //! Max number of cell "columns" on a level
     const float level_x = LEVEL_X;
     //! Max number of cell "rows" on a level
     const float level_y = LEVEL_Y;
     //! Size of a single cell in GL units.
-    const float cell_size = CELL_SIZE;
+    const float cell_size = CELL_SIZE;    
+    float prev_x = 0, prev_y = 0;
+    float prev_prev_x = 0, prev_prev_y = 0;
+    float prev_prev_prev_x = 0, prev_prev_prev_y = 0;
+    triangle_side_mode trig_side_mode = both_sides;
+
 private:
-    int wall_is_present (const wall& wall);
+    int wall_is_present (const wall &wall);
+    void add_wall (float x1, float y1, float x2, float y2);
+
+    std::vector<dot> dots;
+
 signals:
     void print_console (const std::string &s);
 };

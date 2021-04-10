@@ -32,10 +32,10 @@ void camera::relocateView()
 {
     if (glfwGetKey(window_, keys_.mv_fwd) == GLFW_PRESS)
         position_ += lin_velocity_ * (GLfloat)elapsed_time_
-        * glm::vec3(sinf(course_), -cosf(course_), 0.0f);
+        * glm::vec3(sinf(course_), cosf(course_), 0.0f);
     if (glfwGetKey(window_, keys_.mv_bck) == GLFW_PRESS)
         position_ -= lin_velocity_ * (GLfloat)elapsed_time_
-        * glm::vec3(sinf(course_), -cosf(course_), 0.0f);
+        * glm::vec3(sinf(course_), cosf(course_), 0.0f);
     if (glfwGetKey(window_, keys_.mv_left) == GLFW_PRESS)
         position_ -= glm::normalize(glm::cross(direction_, cam_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
@@ -149,6 +149,16 @@ void camera::setDirection(glm::vec3 directionv)
     relocateView();
 }
 
+glm::vec3 camera::getDirection ()
+{
+    return direction_;
+}
+
+glm::vec3 camera::getPosition ()
+{
+    return position_;
+}
+
 void camera::setMouseSensitivity(GLfloat value)
 {
     mouse_sensitivity_ = value;
@@ -165,8 +175,8 @@ void camera::rotateViewMouse(GLfloat x_cursor_offset, GLfloat y_cursor_offset)
     
     direction_ = glm::vec3(
         sinf(course_) * cosf(pitch_),
-        sinf(pitch_),
-        -cosf(course_) * cosf(pitch_)
+        cosf(course_) * cosf(pitch_),
+        sinf(pitch_)
     );
 }
 
