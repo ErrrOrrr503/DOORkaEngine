@@ -94,7 +94,7 @@ public:
     float prev_x = 0, prev_y = 0;
     float prev_prev_x = 0, prev_prev_y = 0;
     float prev_prev_prev_x = 0, prev_prev_prev_y = 0;
-    triangle_side_mode trig_side_mode = both_sides;
+    triangle_side_mode trig_side_mode = one_side;
 
 private:
     int wall_is_present (const wall &wall);
