@@ -96,6 +96,8 @@ void oGL_out::keyPressEvent(QKeyEvent *ke)
 
 void oGL_out::mouseMoveEvent(QMouseEvent *me)
 {
+    if (!hasFocus ())
+        setFocus ();
     if (flag_mouse_is_pressed) {
         center_x = old_center_x - me->localPos().x() + cursor.pressed_x_raw;
         center_y = old_center_y + me->localPos().y() - cursor.pressed_y_raw;
@@ -115,9 +117,13 @@ void oGL_out::mousePressEvent(QMouseEvent *me)
         cursor.type = plain;
     cursor.set(me->localPos().x(), me->localPos().y(), height(), width(), center_x, center_y, z_angle, scale);
     if (cursor.type == sel_mode)
-        level->select_wall(cursor.cur_x, cursor.cur_y);
+        level->select_wall (cursor.cur_x, cursor.cur_y);
     if (cursor.type == draw_mode)
         level->add_wall_trio (cursor.cur_x, cursor.cur_y);
+    if (cursor.type == draw_clipping_mode)
+        level->add_wall_trio_clipping (cursor.cur_x, cursor.cur_y);
+    if (cursor.type == unsel_mode)
+        level->unselect_wall (cursor.cur_x, cursor.cur_y);
     update();
 #ifdef DEBUG_DRAW
     emit print_console("mouse pointed to x = " + std::to_string(cursor.cur_x) + " y = " + std::to_string(cursor.cur_y));
@@ -149,8 +155,14 @@ void oGL_out::ogl_change_mode (edit_mode in_mode)
     case draw:
         cursor.type = draw_mode;
         break;
+    case draw_clipping:
+        cursor.type = draw_clipping_mode;
+        break;
     case sel:
         cursor.type = sel_mode;
+        break;
+    case unsel:
+        cursor.type = unsel_mode;
         break;
     default:
         break;
@@ -165,7 +177,7 @@ void oGL_out::pointers_paint()
         f30->glPointSize(20);
         f30->glColor3f(1.0, 0.5, 0.0);
         if (cursor.type  == sel_mode)
-            f30->glColor3f(0.0, 0.5, 1.0);
+            f30->glColor3fv(level->wall_color);
         f30->glBegin(GL_POINTS);
         f30->glVertex3f(cursor.cur_x, cursor.cur_y, 0);
         f30->glEnd();
@@ -173,6 +185,8 @@ void oGL_out::pointers_paint()
         f30->glColor3f(0.5, 0.25, 0.0);
         if (cursor.type  == sel_mode)
             f30->glColor3f(0.0, 0.25, 0.5);
+        if (cursor.type  == draw_clipping_mode)
+            f30->glColor3f(0.3, 0.5, 0.7);
         f30->glBegin(GL_POINTS);
         f30->glVertex3f(cursor.cur_x, cursor.cur_y, 0);
         f30->glEnd();
@@ -197,34 +211,51 @@ void oGL_out::level_paint()
     }
     f30->glEnd ();
 
-    f30->glLineWidth (2);
+    f30->glLineWidth (1);
     f30->glColor3f (WALL_COLOR_R, WALL_COLOR_G, WALL_COLOR_B);
     f30->glEnable (GL_LINE_STIPPLE);
     f30->glLineStipple (1, 0xF0F0);
-    f30->glBegin (GL_LINES);
+        f30->glBegin (GL_LINES);
+        for (size_t i = 0; i < level->walls.size (); i++) {
+            if (!level->walls[i].is_colored) { //invisible walls
+                f30->glVertex2f(level->walls[i].x1, level->walls[i].y1);
+                f30->glVertex2f(level->walls[i].x2, level->walls[i].y2);
+            }
+        }
+        f30->glEnd ();
+    f30->glDisable (GL_LINE_STIPPLE);
+    f30->glLineWidth (2);
+    glBegin (GL_LINES);
     for (size_t i = 0; i < level->walls.size (); i++) {
-        f30->glVertex2f(level->walls[i].x1, level->walls[i].y1);
-        f30->glVertex2f(level->walls[i].x2, level->walls[i].y2);
+        if (level->walls[i].is_colored) { //visible walls
+            glColor3fv (level->walls[i].color);
+            f30->glVertex2f(level->walls[i].x1, level->walls[i].y1);
+            f30->glVertex2f(level->walls[i].x2, level->walls[i].y2);
+        }
     }
     f30->glEnd ();
 
-    if (cursor.type == draw_mode) {
+    if (cursor.type == draw_mode || cursor.type == draw_clipping_mode) {
         f30->glColor3f (FUTURE_WALL_COLOR_R, FUTURE_WALL_COLOR_G, FUTURE_WALL_COLOR_B);
+        f30->glEnable (GL_LINE_STIPPLE);
+        f30->glLineStipple (1, 0xF0F0);
+            f30->glBegin (GL_LINES);
+                f30->glVertex2f (level->prev_x, level->prev_y);
+                f30->glVertex2f (cursor.cur_x, cursor.cur_y);
+                f30->glVertex2f (level->prev_prev_x, level->prev_prev_y);
+                f30->glVertex2f (cursor.cur_x, cursor.cur_y);
+            f30->glEnd ();
+        f30->glDisable (GL_LINE_STIPPLE);
+    }
+
+    if (level->selected_wall != nullptr) {
+        f30->glLineWidth (3);
+        f30->glColor3f (SELECTED_WALL_COLOR_R, SELECTED_WALL_COLOR_G, SELECTED_WALL_COLOR_B);
         f30->glBegin (GL_LINES);
-            f30->glVertex2f (level->prev_x, level->prev_y);
-            f30->glVertex2f (cursor.cur_x, cursor.cur_y);
-            f30->glVertex2f (level->prev_prev_x, level->prev_prev_y);
-            f30->glVertex2f (cursor.cur_x, cursor.cur_y);
+        glVertex2f (level->selected_wall->x1, level->selected_wall->y1);
+        glVertex2f (level->selected_wall->x2, level->selected_wall->y2);
         f30->glEnd ();
     }
-    f30->glDisable (GL_LINE_STIPPLE);
-
-    f30->glLineWidth (3);
-    f30->glColor3f (SELECTED_WALL_COLOR_R, SELECTED_WALL_COLOR_G, SELECTED_WALL_COLOR_B);
-    f30->glBegin (GL_LINES);
-    glVertex2f (level->selected_wall.x1, level->selected_wall.y1);
-    glVertex2f (level->selected_wall.x2, level->selected_wall.y2);
-    f30->glEnd ();
 }
 
 void oGL_out::test_paint()

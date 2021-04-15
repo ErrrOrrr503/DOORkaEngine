@@ -9,6 +9,8 @@
 
 enum edit_mode {
     sel,
+    unsel,
+    draw_clipping,
     draw
 };
 
@@ -42,9 +44,21 @@ public:
      */
     void select_wall (float x, float y);
     /*!
+     * \brief Check whether the given coordinates are near to any wall and place it into selected_wall buffer.
+     * \param x X-coordinate of the cursor
+     * \param y Y - coordinate
+     * \details The required proximity is determined by delta value (10.0 by default).
+     * The more delta value, the more distance is allowed.
+     */
+    void unselect_wall (float x, float y);
+    /*!
      * \brief Push the wall in the selected_wall buffer into walls vector.
      */
     void add_wall_trio (float x, float y);
+    /*!
+     * \brief Push the wall in the selected_wall buffer into walls vector.
+     */
+    void add_wall_trio_clipping (float x, float y);
     /*!
      * \brief Delete selected wall from the walls vector.
      */
@@ -77,20 +91,21 @@ public:
      * \details swaps prev and prev_prev_prev
      */
     void swap_triangle_sides ();
-
+    void ctrl_z ();
     //! Vector where all level wall objects are stored. Unsorted.
     std::vector<wall> walls;
     /*!
      * \brief Buffer for a selected wall data.
      * \details The selected wall may or may not be in walls vector.
      */
-    wall selected_wall = {};
+    wall *selected_wall = nullptr;
     //! Max number of cell "columns" on a level
     const float level_x = LEVEL_X;
     //! Max number of cell "rows" on a level
     const float level_y = LEVEL_Y;
     //! Size of a single cell in GL units.
-    const float cell_size = CELL_SIZE;    
+    const float cell_size = CELL_SIZE;
+    float wall_color[3] = {DEF_WALL_COLOR_R, DEF_WALL_COLOR_G, DEF_WALL_COLOR_B};
     float prev_x = 0, prev_y = 0;
     float prev_prev_x = 0, prev_prev_y = 0;
     float prev_prev_prev_x = 0, prev_prev_prev_y = 0;

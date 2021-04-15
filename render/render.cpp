@@ -68,6 +68,8 @@ void Render::draw_gl12 ()
     //now camera is set and we can draw
     GLfloat wall[12];
     for (size_t i = 0; i < level_->walls.size (); i++) {
+        if (!level_->walls[i].is_colored)
+            continue;
         glColor3f (level_->walls[i].color[0], level_->walls[i].color[1], level_->walls[i].color[2]);
         wall[0] = level_->walls[i].x1 / CELL_SIZE;
         wall[1] = level_->walls[i].y1 / CELL_SIZE;

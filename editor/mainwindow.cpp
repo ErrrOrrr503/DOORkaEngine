@@ -32,6 +32,10 @@ MainWindow::~MainWindow()
     outfile.close();
 }
 
+void MainWindow::keyPressEvent (QKeyEvent *ke)
+{
+
+}
 
 void MainWindow::on_drawButton_clicked()
 {
@@ -41,6 +45,16 @@ void MainWindow::on_drawButton_clicked()
 void MainWindow::on_selectButton_clicked()
 {
     change_mode (sel);
+}
+
+void MainWindow::on_unselButton_clicked()
+{
+    change_mode (unsel);
+}
+
+void MainWindow::on_clippingButton_clicked()
+{
+    change_mode (draw_clipping);
 }
 
 void MainWindow::print_console (const std::string &s)
@@ -60,15 +74,35 @@ void MainWindow::change_mode (edit_mode in_mode)
     switch (in_mode) {
     case draw:
         console += "'draw'";
-        ui->text_tool->setText("draw");
-        ui->drawButton->setDown(1);
-        ui->selectButton->setDown(0);
+        ui->text_tool->setText ("draw");
+        ui->drawButton->setDown (1);
+        ui->clippingButton->setDown (0);
+        ui->selectButton->setDown (0);
+        ui->unselButton->setDown (0);
+        break;
+    case draw_clipping:
+        console += "'draw_clipping'";
+        ui->text_tool->setText ("clip");
+        ui->drawButton->setDown (0);
+        ui->clippingButton->setDown (1);
+        ui->selectButton->setDown (0);
+        ui->unselButton->setDown (0);
         break;
     case sel:
         console += "'select'";
-        ui->text_tool->setText("select");
-        ui->selectButton->setDown(1);
-        ui->drawButton->setDown(0);
+        ui->text_tool->setText ("select");
+        ui->drawButton->setDown (0);
+        ui->clippingButton->setDown (0);
+        ui->selectButton->setDown (1);
+        ui->unselButton->setDown (0);
+        break;
+    case unsel:
+        console += "'unselect'";
+        ui->text_tool->setText ("unsel");
+        ui->drawButton->setDown (0);
+        ui->clippingButton->setDown (0);
+        ui->selectButton->setDown (0);
+        ui->unselButton->setDown (1);
         break;
     default:
         break;
@@ -108,8 +142,9 @@ void MainWindow::on_actionLoad_triggered ()
 
 void MainWindow::on_actionDelete_wall_triggered ()
 {
-    level.delete_wall ();
-    ogl_out->update ();
+    print_console ("sorry from v0.hz deletion is unsuported due to triangles. No money, but hold on, best wishes, good mood...");
+    //level.delete_wall ();
+    //ogl_out->update ();
 }
 
 void MainWindow::open_file_dialog (flag_saveload flag)
@@ -172,8 +207,33 @@ void MainWindow::on_opendialog_finish(const std::string &filename, flag_saveload
 
 void MainWindow::on_trig_sideButton_clicked()
 {
-    if (level.trig_side_mode == both_sides)
+    if (level.trig_side_mode == both_sides) {
         level.trig_side_mode = one_side;
-    else
+        ui->trig_sideButton->setDown (1);
+    }
+    else {
         level.trig_side_mode = both_sides;
+        ui->trig_sideButton->setDown (0);
+    }
+}
+
+void MainWindow::on_colorButoon_clicked()
+{
+    QColorDialog *colordialog = new QColorDialog (this);
+    QObject::connect(colordialog, &QColorDialog::colorSelected,
+                     this, &MainWindow::on_color_selected);
+    colordialog->show();
+}
+void MainWindow::on_color_selected (const QColor &newcolor)
+{
+    level.wall_color[0] = newcolor.redF ();
+    level.wall_color[1] = newcolor.greenF ();
+    level.wall_color[2] = newcolor.blueF ();
+}
+
+void MainWindow::on_actionRevert_chandes_triggered()
+{
+    print_console ("ctrlz");
+    level.ctrl_z ();
+    ogl_out->update ();
 }

@@ -2,20 +2,6 @@
 
 void Level::select_wall (float x, float y)
 {
-    /*
-    if (x - round (x / cell_size) * cell_size < delta_ && x - round (x / cell_size) * cell_size > - delta_) {
-        selected_wall.x1 = selected_wall.x2 = round (x / cell_size) * cell_size;
-        selected_wall.y1 = floor (y / cell_size) * cell_size;
-        selected_wall.y2 = (floor (y / cell_size) + 1) * cell_size;
-    }
-    if (y - round (y / cell_size) * cell_size < delta_ && y - round (y / cell_size) * cell_size > - delta_) {
-        selected_wall.y1 = selected_wall.y2 = round (y / cell_size) * cell_size;
-        selected_wall.x1 = floor (x / cell_size) * cell_size;
-        selected_wall.x2 = (floor (x / cell_size) + 1) * cell_size;
-    }
-    selected_wall.zlo1 = selected_wall.zlo2 = 0;
-    selected_wall.zhi1 = selected_wall.zhi2 = DEF_WALL_HEIGHT;
-    */
     for (size_t i = 0; i < walls.size (); i++) {
         if (x + delta_ < std::min (walls[i].x1, walls[i].x2) ||
             x - delta_ > std::max (walls[i].x1, walls[i].x2) ||
@@ -34,23 +20,32 @@ void Level::select_wall (float x, float y)
         if (square_distance > delta_ * delta_)
             continue;
         else {
-            selected_wall.x1 = x1;
-            selected_wall.x2 = x2;
-            selected_wall.y1 = y1;
-            selected_wall.y2 = y2;
-            break;
+            selected_wall = &walls[i];
+            selected_wall->zlo1 = selected_wall->zlo2 = 0;
+            selected_wall->zhi1 = selected_wall->zhi2 = DEF_WALL_HEIGHT;
+            selected_wall->color[0] = wall_color[0];
+            selected_wall->color[1] = wall_color[1];
+            selected_wall->color[2] = wall_color[2];
+            selected_wall->is_colored = true;
+            return;
         }
     }
-    selected_wall.zlo1 = selected_wall.zlo2 = 0;
-    selected_wall.zhi1 = selected_wall.zhi2 = DEF_WALL_HEIGHT;
+    selected_wall = nullptr; // no matching wall - reset selection
+}
+
+void Level::unselect_wall (float x, float y)
+{
+    select_wall (x, y);
+    if (selected_wall == nullptr)
+        return;
+    selected_wall->color[0] = DEF_WALL_COLOR_R;
+    selected_wall->color[1] = DEF_WALL_COLOR_G;
+    selected_wall->color[2] = DEF_WALL_COLOR_B;
+    selected_wall->is_colored = false;
 }
 
 void Level::add_wall_trio (float x, float y)
 {
-    /*
-    if (wall_is_present (selected_wall) < 0)
-        walls.push_back(selected_wall);
-    */
     //check collision with other dot
     for (size_t i = 0; i < dots.size (); i++) {
         float square_distance = (x - dots[i].x) * (x - dots[i].x) + (y - dots[i].y) * (y - dots[i].y);
@@ -90,6 +85,17 @@ void Level::add_wall_trio (float x, float y)
     }
 }
 
+void Level::add_wall_trio_clipping (float x, float y)
+{
+    if ((x - round (x / cell_size) * cell_size < delta_ && x - round (x / cell_size) * cell_size > - delta_) &&
+        (y - round (y / cell_size) * cell_size < delta_ && y - round (y / cell_size) * cell_size > - delta_))
+    {
+        x = round (x / cell_size) * cell_size;
+        y = round (y / cell_size) * cell_size;
+        add_wall_trio (x, y);
+    }
+}
+
 void Level::add_wall (float x1, float y1, float x2, float y2)
 {
     wall temp_wall;
@@ -110,7 +116,7 @@ void Level::add_wall (float x1, float y1, float x2, float y2)
 
 void Level::delete_wall ()
 {
-    int pos = wall_is_present (selected_wall);
+    int pos = wall_is_present (*selected_wall);
     if (pos < 0)
         return;
     walls.erase (walls.begin () + pos);
@@ -167,7 +173,7 @@ int Level::load_level (std::ifstream &infile)
         break;
     }
     emit print_console ("loading " + std::to_string (walls.size () * sizeof (wall)) + " bytes to walls[]");
-    selected_wall = {};
+    selected_wall = nullptr;
     prev_prev_prev_x = fileheader.prev_prev_prev_x;
     prev_prev_prev_y = fileheader.prev_prev_prev_y;
     prev_prev_x = fileheader.prev_prev_x;
@@ -186,4 +192,24 @@ void Level::swap_triangle_sides ()
 {
     std::swap (prev_x, prev_prev_prev_x);
     std::swap (prev_y, prev_prev_prev_y);
+}
+
+void Level::ctrl_z ()
+{
+    //remove 2 last walls and 1 dot
+    if (walls.size () <= 3 || dots.size () < 3)
+        return;
+    walls.pop_back ();
+    walls.pop_back ();
+    dots.pop_back ();
+    prev_x = dots[dots.size () - 1].x;
+    prev_y = dots[dots.size () - 1].y;
+    prev_prev_x = dots[dots.size () - 2].x;
+    prev_prev_y = dots[dots.size () - 2].y;
+    prev_prev_prev_x = dots[dots.size () - 3].x;
+    prev_prev_prev_y = dots[dots.size () - 3].y;
+    if (trig_side_mode != both_sides) {
+        std::swap (prev_prev_x, prev_x);
+        std::swap (prev_prev_y, prev_y);
+    }
 }

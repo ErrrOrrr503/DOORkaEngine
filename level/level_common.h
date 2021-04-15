@@ -37,7 +37,7 @@
 
 struct level_fileheader {
 //common data:
-    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00001";
+    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00002";
     uint32_t version = 1;
     uint64_t walls_size; // in bytes
     uint64_t other_size;
@@ -61,6 +61,7 @@ struct wall {
     float x1 = 0, y1 = 0, zlo1 = 0, zhi1 = DEF_WALL_HEIGHT;
     float x2 = 0, y2 = 0, zlo2 = 0, zhi2 = DEF_WALL_HEIGHT;
     float color[3] = {DEF_WALL_COLOR_R, DEF_WALL_COLOR_G, DEF_WALL_COLOR_B};
+    bool is_colored = false;
 };
 
 /*!

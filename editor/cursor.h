@@ -6,7 +6,9 @@
 enum cursor_type {
     plain,
     draw_mode,
+    draw_clipping_mode,
     sel_mode,
+    unsel_mode,
     none
     //enum forbids equal enumenators for different enums? strange, errors could be given on type resolving when ambigious
 };
