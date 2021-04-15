@@ -5,13 +5,14 @@
 
 int main (int argc, char **argv)
 {
-    if (argc != 2) {
-        std::cout << "usage: " << argv[0] << " <filename>" << std::endl;
+    Level level;
+    if (argc > 2) {
+        std::cout << "usage: " << argv[0] << " [filename]" << std::endl;
         return 1;
     }
-    Level level;
     if (level.load_level (argv[1])) {
-        return 1;
+        if (level.load_level ("testlvl.lvl"))
+            return 1;
     }
     //now level is loaded
     Render render (level);
