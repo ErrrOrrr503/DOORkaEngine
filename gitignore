@@ -1,0 +1,4 @@
+/build*/
+/Build*/
+*.exe
+*.pro.user
