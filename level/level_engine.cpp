@@ -11,7 +11,7 @@ int Level::load_level (const char *filename)
     std::ifstream infile;
     infile.open(filename, infile.binary | infile.in);
     if (!infile.is_open()) {
-        std::cerr << "FAILED to open '" << filename << "'for read" << std::endl;
+        std::cerr << "FAILED to open '" << filename << "' for read" << std::endl;
         return ERR_FILEOPEN;
     }
     int ret = load_level_common (walls, infile);

@@ -6,7 +6,7 @@
 int main (int argc, char **argv)
 {
     Level level;
-    if (argc > 2) {
+    if (argc != 2) {
         std::cout << "usage: " << argv[0] << " [filename]" << std::endl;
         return 1;
     }
