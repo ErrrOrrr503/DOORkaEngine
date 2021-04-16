@@ -9,8 +9,8 @@ LFLAGS += -lglfw -ldl -lm
 
 all: example
 
-example: sphere.o camera.o camera_example.o Makefile
-	$(CC) $(LFLAGS) sphere.o camera.o camera_example.o -o example.exe
+example: sphere.o camera.o position.o camera_example.o Makefile
+	$(CC) $(LFLAGS) sphere.o camera.o position.o camera_example.o -o example.exe
 
 sphere.o: sphere.cpp
 	$(CC) $(CFLAGS) $(LFLAGS) -c sphere.cpp
@@ -20,6 +20,9 @@ camera_example.o: camera_example.cpp shader_source
 
 camera.o: ../camera/camera.cpp
 	$(CC) $(CFLAGS) $(LFLAGS) -c ../camera/camera.cpp -o ./camera.o
+
+position.o:
+	$(CC) $(CFLAGS) $(LFLAGS) -c ../camera/position.cpp -o ./position.o
 
 clean:
 	rm -rf *.o

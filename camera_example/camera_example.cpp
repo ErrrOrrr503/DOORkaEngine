@@ -10,6 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "../camera/camera.h"
+#include "../camera/position.h"
 
 #ifdef DE_USE_SHADERS
 #include "shader_source"
@@ -22,6 +23,7 @@ const unsigned int SCR_HEIGHT = 800;
 // Main camera object
 // It should be private object of our engine class
 static camera* g_cumera;
+static player_position* g_pos;
 
 // Last cursor position
 // They should be private objects of our engine class
@@ -38,7 +40,8 @@ void init()
 
 void processInput(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if ((glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) &&
+        (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS))
         glfwSetWindowShouldClose(window, true);
 }
 
@@ -52,7 +55,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 void cursor_callback(GLFWwindow* window, GLdouble xpos, GLdouble ypos)
 {
     (void)window;
-    g_cumera->rotateViewMouse(xpos - g_lastx, ypos - g_lasty);
+    g_pos->rotateViewMouse(xpos - g_lastx, ypos - g_lasty);
     g_lastx = xpos;
     g_lasty = ypos;
 }
@@ -117,14 +120,15 @@ int main()
 
     // Make final initialization
     sphere sfera(0.0, 0.0, 0.0, 1.0, 98, 100);
-    g_cumera = new camera(window);
+    g_pos = new player_position(window);
+    g_cumera = new camera(window, g_pos);
     init();
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, cursor_callback);
-    g_cumera->setMouseSensitivity(0.005f);
+    g_pos->setMouseSensitivity(0.005f);
 #ifdef DE_SET_VIM_MODE
     // Seiing camera movement to hjkl like vim cursor movement.
-    g_cumera->setControls(camera::key_container(
+    g_pos->setControls(camera::key_container(
         GLFW_KEY_UP, GLFW_KEY_DOWN,  GLFW_KEY_LEFT, GLFW_KEY_RIGHT,
         GLFW_KEY_J, GLFW_KEY_K, GLFW_KEY_H, GLFW_KEY_L
     ));
@@ -133,7 +137,7 @@ int main()
     // Starting render loop
     while(!glfwWindowShouldClose(window)) {
         processInput(window);
-        g_cumera->relocateView();
+        g_pos->relocateView();
         glClear(GL_COLOR_BUFFER_BIT);
 #ifdef DE_USE_SHADERS
         // Selecting shader program
@@ -151,7 +155,7 @@ int main()
         glColor3f (1.0f, 1.0f, 0.1f);
 #endif
         sfera.draw();
-        g_cumera->acquireDeltaTime();
+        g_pos->acquireDeltaTime();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
