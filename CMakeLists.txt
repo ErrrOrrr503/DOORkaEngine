@@ -8,7 +8,7 @@ set (CMAKE_CXX_FLAGS_LINUX  "-Wall -Wextra -Wnarrowing -Wfloat-equal -Wundef -Ws
 set (CMAKE_EXE_LINKER_FLAGS_LINUX "-lGL -lGLEW -lglfw -lpthread")
 set (CMAKE_EXE_LINKER_FLAGS_WIN32 "opengl32.lib glew32s.lib glfw3.lib")
 
-set (SOURCE_EXE main.cpp render/render.cpp camera/camera.cpp level/level_common.cpp level/level_engine.cpp)
+set (SOURCE_EXE main.cpp render/render.cpp camera/camera.cpp camera/position.cpp level/level_common.cpp level/level_engine.cpp)
 
 include_directories (${CMAKE_SOURCE_DIR}/libraries/glm/include)
 
@@ -26,13 +26,13 @@ elseif (UNIX)
 		message (FATAL_ERROR "Unknown UNIX: go patch KDE2 for your FREEbsdm or pay 9999$ to install normal os on your aplle machine")	
 	endif ()
 	message ("generating for Linux")
-	#find_package (glfw3 REQUIRED)  cmake knows how to search for glfw3 but it fails as package is called glfw. Cmake can't search it and I'm lazy to write finding script myself
+	#find_package (glfw3 REQUIRED)  cmake knows how to search for glfw3 but it fails as package is called glfw. Cmake can't search it and I'm too lazy to write finding script myself
 	#if (NOT GLFW3_FOUND)
-	#	message (FATAL_ERROR "GLFW not found, use 'pacman -S glfw-x11 glfw-wayland' to install it (and ubuntu users should now forget about copypasting and find package name thireselves ;)")
+	#	message (FATAL_ERROR "GLFW not found, use 'pacman -S glfw-x11 glfw-wayland' to install it (and ubuntu users should now forget about copypasting and find package name themselves ;)")
 	#endif ()
 	find_package (GLEW REQUIRED)
 	if (NOT GLEW_FOUND)
-		message (FATAL_ERROR "GLEW not found, use 'pacman -S glew lib32-glew' to install it (and ubuntu users should now forget about copypasting and find package name thireselves ;)")
+		message (FATAL_ERROR "GLEW not found, use 'pacman -S glew lib32-glew' to install it (and ubuntu users should now forget about copypasting and find package name themselves ;)")
 	endif ()
 	set (CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS_LINUX})
 	set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_LINUX})

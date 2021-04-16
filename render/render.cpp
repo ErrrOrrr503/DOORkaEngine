@@ -1,8 +1,10 @@
 #include "render.h"
 
-static camera *gCamera; //crunch... BF crunch for BF cringe... to use in c-callback of glfw
+//crunch... BF crunch for BF cringe... to use in c-callback of glfw
 //well gCamera is only visible in render.cpp so it is not that global. And it can be altered by only render members.
 //Maybe that's not that awful...
+static player_position *gPos;
+static camera *gCamera; 
 
 Render::Render (Level &level)
 {
@@ -29,8 +31,9 @@ Render::Render (Level &level)
         status_ = err_glew;
     }
     draw_mode_ = gl12; //fixme: different renders according to hw, same interface;
-    gCamera = new camera (window_, glm::vec3 (0, 0, 25.0 / CELL_SIZE), glm::vec3 (1, 0, 0));
-    gCamera->setMouseSensitivity(0.005f);
+    gPos = new player_position (window_, glm::vec3 (0, 0, 25.0 / CELL_SIZE), glm::vec3 (1, 0, 0));
+    gPos->setMouseSensitivity(0.005f);
+    gCamera = new camera(window_, gPos);
     glEnable (GL_DEPTH_TEST);
     glEnable (GL_MULTISAMPLE);
 }
@@ -58,7 +61,7 @@ void Render::draw_gl12 ()
         glfwDestroyWindow(window_);
         return;
     }
-    gCamera->relocateView ();
+    gPos->relocateView ();
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode (GL_MODELVIEW);
     glLoadMatrixf (glm::value_ptr(gCamera->getViewMatrix()));
@@ -91,7 +94,7 @@ void Render::draw_gl12 ()
         glDrawArrays (GL_LINE_LOOP, 0, 4);
     }
 
-    gCamera->acquireDeltaTime();
+    gPos->acquireDeltaTime();
     glfwSwapBuffers(window_);
 }
 
@@ -112,16 +115,16 @@ void Render::cursor_callback (GLFWwindow* window, GLdouble xpos, GLdouble ypos)
     static GLdouble lastx = xpos;
     static GLdouble lasty = ypos;
     (void)window;
-    gCamera->rotateViewMouse(xpos - lastx, ypos - lasty);
+    gPos->rotateViewMouse(xpos - lastx, ypos - lasty);
     lastx = xpos;
     lasty = ypos;
 }
 
 
-void Render::setCamera (glm::vec3 positionv, glm::vec3 directionv)
+void Render::setCamera (glm::vec3 locationv, glm::vec3 directionv)
 {
-    gCamera->setPosition (positionv);
-    gCamera->setDirection (directionv);
+    gPos->setLocation (locationv);
+    gPos->setDirection (directionv);
 }
 
 void Render::misc_keyboard_input (GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -148,9 +151,9 @@ void Render::misc_keyboard_input (GLFWwindow *window, int key, int scancode, int
             is_fullscreen = true;
         }
         else {
-            glm::vec3 pre_resize_direction = gCamera->getDirection ();
+            glm::vec3 pre_resize_direction = gPos->getDirection ();
             glfwSetWindowMonitor (window, NULL, windowed_xpos, windowed_ypos, windowed_width, windowed_height, GLFW_DONT_CARE);
-            gCamera->setDirection (pre_resize_direction);
+            gPos->setDirection (pre_resize_direction);
             is_fullscreen = false;
         }
     }

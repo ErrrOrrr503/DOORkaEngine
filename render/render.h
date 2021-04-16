@@ -2,6 +2,7 @@
 #define RENDER_H
 
 #include "../camera/camera.h"
+#include "../camera/position.h"
 #include "../level/level_engine.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -11,7 +12,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../camera_example/sphere.h"
 
 enum render_status_type {
     ok,
