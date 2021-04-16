@@ -1,9 +1,12 @@
 #ifndef DE_PLAYER_POSITION_H
 #define DE_PLAYER_POSITION_H
+//! @file position.h
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+// Full declarations of all friend classes are required here.
+#include "camera.h"
 
 class player_position
 {
@@ -131,6 +134,8 @@ public:
      * Change fields of retrieved structure andd feed it to setControls().
      */
     player_position::key_container getControls();
+    //! @brief See camera class (camera.h).
+    friend glm::mat4 camera::getViewMatrix();
 };
 
 #endif // DE_PLAYER_POSITION_H

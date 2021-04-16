@@ -1,7 +1,0 @@
-* Implement revolving camera around the sphere - DONE
-	- quaternion camera positioning and quaternion-to-matrix transition - not needed
-* Implement camera strafe with keys by a fixed delta-coord value - DONE
-* Implement camera that rotates and strafes using glfwTime - DONE
-* Implement mouse positioning - DONE
-* Implement reading keybindings from a file - not needed, setting keybindings through a method - DONE
-* collision check (!)

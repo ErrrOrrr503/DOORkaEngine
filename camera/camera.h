@@ -8,7 +8,10 @@
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "position.h"
+
+// This declaraion is required to make this class declaration.
+// It won't compile if we include full declaration here.
+class player_position;
 
 /*!
  * @brief FPS camera class for DOORka engine.

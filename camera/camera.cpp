@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "position.h"
 
 camera::camera(GLFWwindow* window, player_position* position)
 {
@@ -20,8 +21,8 @@ void camera::resetWindowSize(GLint width, GLint height)
 glm::mat4 camera::getViewMatrix()
 {
     return glm::lookAt(
-        pos_->getLocation(),
-        pos_->getLocation() + pos_->getDirection(),
+        pos_->location_,
+        pos_->location_ + pos_->direction_,
         cam_up_
         );
 }
