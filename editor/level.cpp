@@ -150,18 +150,24 @@ int Level::save_level (std::ofstream &outfile)
     fileheader.prev_prev_y = prev_prev_y;
     fileheader.prev_x = prev_x;
     fileheader.prev_y = prev_y;
+    std::vector<pos_t> walls_compressed = compress((char *) walls.data(), fileheader.walls_size);
+    fileheader.walls_codon_count = walls_compressed.size();
+    unsigned char* walls_packed = nullptr;
+    size_t walls_pck_size = pack(walls_compressed, &walls_packed);
     outfile.write ((char *) &fileheader, sizeof (level_fileheader));
-    outfile.write ((char *) &walls[0], fileheader.walls_size);
+    outfile.write ((char *) walls_packed, walls_pck_size);
     outfile.flush ();
+    delete [] walls_packed;
     emit print_console ("Level saved. Header: " + std::to_string (sizeof (level_fileheader)) +
-                        " bytes. Walls: " + std::to_string (fileheader.walls_size) + " bytes.");
+                        " bytes. Walls: " + std::to_string (fileheader.walls_size) + " bytes." +
+                        "\n codon count(walls) = " + std::to_string(fileheader.walls_codon_count));
     return 0;
 }
 
-int Level::load_level (std::ifstream &infile)
+int Level::load_level (std::ifstream &infile, size_t file_size)
 {
     level_fileheader fileheader;
-    int ret = load_level_common (fileheader, walls, infile);
+    int ret = load_level_common (fileheader, walls, infile, file_size);
     switch (ret) {
     case ERR_FILETYPE:
         emit print_console ("ERROR: wrong filetype or major version");

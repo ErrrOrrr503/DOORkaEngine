@@ -5,6 +5,10 @@
 #include <vector>
 #include <fstream>
 #include <cstring>
+#include <filesystem>
+#include "compress.h"
+namespace fs = std::filesystem;
+
 /*!
  * \details Description file for level storage format.
  * Covers both file format and its representation in editor program.
@@ -45,6 +49,8 @@ struct level_fileheader {
     float prev_x = 0, prev_y = 0;
     float prev_prev_x = 0, prev_prev_y = 0;
     float prev_prev_prev_x = 0, prev_prev_prev_y = 0;
+// compressor only data
+    uint64_t walls_codon_count;
 };
 
 /*!
@@ -72,7 +78,7 @@ struct wall {
  * \details Walls vector should be initialized but not necessarily pre-allocated.
  * If stored, all data in the vector will be destroyed and replaced by level data.
  */
-int load_level_common (std::vector<wall> &walls, std::ifstream &infile);
-int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::ifstream &infile);
+int load_level_common (std::vector<wall> &walls, std::ifstream &infile, size_t file_size);
+int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::ifstream &infile, size_t file_size);
 
 #endif // LEVEL_COMMON_H

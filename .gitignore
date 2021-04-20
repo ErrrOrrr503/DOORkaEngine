@@ -1,0 +1,5 @@
+/build*/
+/Build*/
+*.exe
+*.pro.user
+.vscode
