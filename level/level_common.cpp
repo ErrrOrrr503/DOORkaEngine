@@ -1,12 +1,13 @@
 #include "level_common.h"
+#include <iostream>
 
-int load_level_common (std::vector<wall> &walls, std::ifstream &infile)
+int load_level_common (std::vector<wall> &walls, std::ifstream &infile, size_t file_size)
 {
     level_fileheader temp;
-    return load_level_common (temp, walls, infile);
+    return load_level_common (temp, walls, infile, file_size);
 }
 
-int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::ifstream &infile)
+int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::ifstream &infile, size_t file_size)
 {
     fileheader.filetype[0] = 0;
     level_fileheader reference_fileheader;
@@ -17,8 +18,13 @@ int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, s
         return ERR_VERSION;
         //fixme on compatible version
     }
+    size_t data_size = file_size - sizeof (level_fileheader);
+    unsigned char* walls_packed = new unsigned char[data_size];
+    infile.read((char *) walls_packed, data_size);
+    pos_t* walls_compressed = unpack(fileheader.walls_codon_count, walls_packed);
+    delete [] walls_packed;
     walls.clear ();
     walls.resize (fileheader.walls_size / sizeof (wall));
-    infile.read ((char *) &walls[0], fileheader.walls_size);
-    return 0;
+    int state = decompress(walls_compressed, fileheader.walls_codon_count, (char *) &walls[0]);
+    return state;
 }

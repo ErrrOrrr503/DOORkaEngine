@@ -188,7 +188,7 @@ void MainWindow::on_opendialog_finish(const std::string &filename, flag_saveload
             print_console(console + "FAILED for read");
             return;
         }
-        if (level.load_level (infile)) {
+        if (level.load_level (infile, std::filesystem::file_size(filename))) {
             infile.close ();
             print_console (console + "SUCCESS for read");
             print_console ("level loading failed!");

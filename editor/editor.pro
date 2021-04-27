@@ -17,7 +17,8 @@ SOURCES += \
     mainwindow.cpp \
     ogl_out.cpp \
     opendialog.cpp \
-    sphere.cpp
+    sphere.cpp \
+    ../level/compress.cpp
 
 HEADERS += \
     cursor.h \
@@ -27,7 +28,8 @@ HEADERS += \
     mainwindow.h \
     ogl_out.h \
     opendialog.h \
-    sphere.h
+    sphere.h \
+    ../level/compress.h
 
 FORMS += \
     mainwindow.ui \

@@ -6,6 +6,7 @@
 #include <QObject>
 #include <fstream>
 #include "../level/level_common.h"
+#include "../level/compress.h"
 
 enum edit_mode {
     sel,
@@ -79,7 +80,7 @@ public:
      * \param infile Open input file stream
      * \return 0 or non-zero error code.
      */
-    int load_level (std::ifstream &infile);
+    int load_level (std::ifstream &infile, size_t file_size);
     /*!
      * \brief Change delta value.
      * \param value
