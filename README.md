@@ -1,5 +1,5 @@
 # DOORka engine 
-v 0.1E-9
+v 0.3E-9
 
 A pseudo-engine utilized to implenent DOOR game.
 
@@ -16,6 +16,7 @@ A pseudo-engine utilized to implenent DOOR game.
 On linux **engine.exe** is right in *build* folder, On windows it is located in *build/Debug/folder*
 
 Also to compile engine on linux you can use:  
-**g++ -Wall -Wextra -lGLEW -lglfw -lGL -lpthread -o render_test.exe ./main.cpp ./render/render.cpp ./camera/camera.cpp ./level/level_common.cpp ./level/level_engine.cpp ./camera_example/sphere.cpp**
+**g++ -Wall -Wextra -lGLEW -lglfw -lGL -lpthread -o render_test.exe ./main.cpp ./render/render.cpp ./camera/camera.cpp ./level/level_common.cpp
+./level/compression.cpp ./level/level_engine.cpp ./camera_example/sphere.cpp**
 
 to compile editor use *qmake* or **qtCreator**
