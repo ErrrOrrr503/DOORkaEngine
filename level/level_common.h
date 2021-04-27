@@ -41,7 +41,7 @@ namespace fs = std::filesystem;
 
 struct level_fileheader {
 //common data:
-    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00002";
+    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00003";
     uint32_t version = 1;
     uint64_t walls_size; // in bytes
     uint64_t other_size;

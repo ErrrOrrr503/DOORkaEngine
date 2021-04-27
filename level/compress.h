@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
-#include "../libraries/map.h"
+#include <unordered_map>
 
 /*! \brief Return codes for compress() function
  * \param COMP_OK Compression was successful

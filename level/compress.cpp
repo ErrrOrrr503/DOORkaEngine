@@ -4,14 +4,14 @@ std::vector<pos_t> compress(const char* input, size_t input_size)
 {
     std::vector<pos_t> result;
     size_t dict_size = 256;
-    tld::map_t<std::string, pos_t> dict;
+    std::unordered_map<std::string, pos_t> dict;
     for (pos_t i = 0; i < dict_size; i++)
         dict[std::string(1, i)] = i;
     std::string buffer, bc;
     for (size_t i = 0; i < input_size; i++) {
         char c = input[i];
         bc = buffer + c;
-        if ((dict[bc] != 0) || (bc == std::string(1, 0))) {
+        if (dict.count(bc) != 0) {
             buffer = bc;
         } else {
             result.push_back(dict[buffer]);
