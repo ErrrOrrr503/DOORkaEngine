@@ -6,6 +6,44 @@
 static player_position *gPos;
 static camera *gCamera; 
 
+Textures::~Textures ()
+{
+    if (texture_names_list_ != nullptr)
+        delete[] texture_names_list_;
+}
+
+int Textures::init_gl12 (const Level &level)
+{
+    texture_names_list_ = new GLuint[level.texture_list.size ()];
+    glGenTextures (level.texture_list.size (), texture_names_list_);
+    for (size_t i = 0; i < level.texture_list.size (); i++) {
+        int width = 0, height = 0;
+        GLubyte *raw_texture = SOIL_load_image ((textures_path_ + level.texture_list[i]).c_str (), &width, &height, 0, SOIL_LOAD_RGBA);
+        if (raw_texture == NULL) {
+            std::cerr << "Failed to load texture: '" << textures_path_ + level.texture_list[i] << "'" << std::endl;
+            return -1;
+        }
+        texture_resolutions_.push_back (texture_res(width, height));
+        // bind
+        glBindTexture (GL_TEXTURE_2D, texture_names_list_[i]);
+        // setup binded
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_mapping_method_);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_mapping_method_);
+        // and generate texture and mipmap levels
+        glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, raw_texture);
+        glGenerateTextureMipmap (texture_names_list_[i]);
+        SOIL_free_image_data (raw_texture);
+    }
+    return 0;
+}
+
+GLuint Textures::operator[] (size_t i)
+{
+    return texture_names_list_[i];
+}
+
 Render::Render (Level &level)
 {
     //fixme: start position of cam in level, will use (0 0 0) (1 0 0) instead
@@ -36,6 +74,9 @@ Render::Render (Level &level)
     gCamera = new camera(window_, gPos);
     glEnable (GL_DEPTH_TEST);
     glEnable (GL_MULTISAMPLE);
+    if (textures_.init_gl12 (level)) {
+        status_ = err_texture;
+    }
 }
 
 Render::~Render ()
@@ -74,6 +115,7 @@ void Render::draw_gl12 ()
         if (!level_->walls[i].is_colored)
             continue;
         glColor3f (level_->walls[i].color[0], level_->walls[i].color[1], level_->walls[i].color[2]);
+        /*
         wall[0] = level_->walls[i].x1 / CELL_SIZE;
         wall[1] = level_->walls[i].y1 / CELL_SIZE;
         wall[2] = level_->walls[i].zlo1 / CELL_SIZE;
@@ -87,11 +129,32 @@ void Render::draw_gl12 ()
         wall[10] = level_->walls[i].y2 / CELL_SIZE;
         wall[11] = level_->walls[i].zhi2 / CELL_SIZE;
         glEnableClientState (GL_VERTEX_ARRAY);
+        */
+        if (level_->walls[i].texture_index != -1) {
+            glEnable (GL_TEXTURE_2D);
+            glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // replace wall color by texture
+            glBindTexture (GL_TEXTURE_2D, textures_[level_->walls[i].texture_index]);
+        }
+        /*
         glVertexPointer (3, GL_FLOAT, 0, wall);
         glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
         glLineWidth (2);
         glColor3f (0.8, 0.2, 0);
         glDrawArrays (GL_LINE_LOOP, 0, 4);
+        */
+        
+        glBegin (GL_TRIANGLE_STRIP);
+            glTexCoord2f (0, 1); // left floor
+                glVertex3f (level_->walls[i].x1 / CELL_SIZE, level_->walls[i].y1 / CELL_SIZE, level_->walls[i].zlo1 / CELL_SIZE);
+            glTexCoord2f (0, 0); // left ceiling
+                glVertex3f (level_->walls[i].x1 / CELL_SIZE, level_->walls[i].y1 / CELL_SIZE, level_->walls[i].zhi1 / CELL_SIZE);
+            glTexCoord2f (1, 1); // right floor
+                glVertex3f (level_->walls[i].x2 / CELL_SIZE, level_->walls[i].y2 / CELL_SIZE, level_->walls[i].zlo2 / CELL_SIZE);
+            glTexCoord2f (1, 0); // right ceiling
+                glVertex3f (level_->walls[i].x2 / CELL_SIZE, level_->walls[i].y2 / CELL_SIZE, level_->walls[i].zhi2 / CELL_SIZE);
+        glEnd ();
+        
+        glDisable (GL_TEXTURE_2D);
     }
 
     gPos->acquireDeltaTime();

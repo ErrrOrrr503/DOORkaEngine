@@ -196,7 +196,7 @@ void oGL_out::pointers_paint()
 
 void oGL_out::level_paint()
 {
-    f30->glClearColor (BACKGROUND_COLOR_R, BACKGROUND_COLOR_G, BACKGROUND_COLOR_B, 0.0);
+    f30->glClearColor (BACKGROUND_COLOR_R, BACKGROUND_COLOR_G, BACKGROUND_COLOR_B, 1.0);
     f30->glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     f30->glLineWidth (1);
     f30->glColor3f (GRID_COLOR_R, GRID_COLOR_G, GRID_COLOR_B);

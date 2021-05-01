@@ -13,6 +13,7 @@ public:
     int load_level (const char *filename);
 
     std::vector<wall> walls;
+    std::vector<std::string> texture_list;
     const float level_x = LEVEL_X; //to level common?
     const float level_y = LEVEL_Y;
     const float cell_size = CELL_SIZE;

@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     ui->console->setReadOnly(true);
+    ui->texture_label->clear();
 
     ogl_layout = new QHBoxLayout(ui->frame_ogl);
     ogl_layout->setContentsMargins(0, 0, 0, 0);
@@ -188,7 +189,7 @@ void MainWindow::on_opendialog_finish(const std::string &filename, flag_saveload
             print_console(console + "FAILED for read");
             return;
         }
-        if (level.load_level (infile, std::filesystem::file_size(filename))) {
+        if (level.load_level (infile)) {
             infile.close ();
             print_console (console + "SUCCESS for read");
             print_console ("level loading failed!");
@@ -236,4 +237,17 @@ void MainWindow::on_actionRevert_chandes_triggered()
     print_console ("ctrlz");
     level.ctrl_z ();
     ogl_out->update ();
+}
+
+void MainWindow::on_sel_textureButton_clicked()
+{
+    std::string tex_filename = QFileDialog::getOpenFileName (this, "Open level", "./textures").toUtf8 ().constData ();
+    size_t last_slash_idx = tex_filename.find_last_of("\\/");
+    if (std::string::npos != last_slash_idx)
+    {
+        tex_filename.erase(0, last_slash_idx + 1);
+    }
+    level.select_texture (tex_filename);
+    ui->texture_label->clear ();
+    ui->texture_label->setText (QString::fromStdString (tex_filename));
 }

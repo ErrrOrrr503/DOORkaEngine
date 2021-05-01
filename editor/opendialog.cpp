@@ -9,6 +9,7 @@ OpenDialog::OpenDialog(QWidget *parent, flag_saveload in_flag) : QDialog(parent)
     filename_layout->setContentsMargins(0, 0, 0, 0);
     filename_layout->setSpacing(0);
     filename_field = new filename_enter (ui->frame_filename);
+    filename_field->setMinimumHeight(30);
     filename_layout->addWidget (filename_field);
     filename_field->show ();
     filename_field->setCursorWidth (1);

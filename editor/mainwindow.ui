@@ -282,6 +282,32 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
+         <widget class="QLabel" name="texture_label">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>160</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>texture</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="sel_textureButton">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>30</y>
+            <width>160</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>select_texture</string>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>

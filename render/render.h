@@ -11,17 +11,43 @@
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <SOIL/SOIL.h>
 
 
 enum render_status_type {
     ok,
     should_close,
     err_glfw,
-    err_glew
+    err_glew,
+    err_texture
 };
 
 enum render_draw_mode {
     gl12,
+};
+
+struct texture_res {
+    texture_res (int nwidth, int nheight)
+    {
+        height = nheight;
+        width = nwidth;
+    }
+    int height = 0;
+    int width = 0;
+};
+
+class Textures {
+public:
+    ~Textures ();
+    int init_gl12 (const Level &level);
+    GLuint operator[] (size_t i);
+
+private:
+    GLint texture_mag_mapping_method_ = GL_LINEAR;
+    GLint texture_min_mapping_method_ = GL_LINEAR_MIPMAP_LINEAR;
+    const std::string textures_path_ = "./textures/";
+    GLuint *texture_names_list_ = nullptr;
+    std::vector<texture_res> texture_resolutions_;
 };
 
 class Render {
@@ -39,6 +65,7 @@ private:
     static void cursor_callback (GLFWwindow* window, GLdouble xpos, GLdouble ypos);
     static void misc_keyboard_input (GLFWwindow *window, int key, int scancode, int action, int mods);
 
+    Textures textures_;
     render_status_type status_ = ok;
     render_draw_mode draw_mode_ = gl12;
     GLFWwindow *window_;

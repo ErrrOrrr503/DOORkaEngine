@@ -27,6 +27,7 @@ void Level::select_wall (float x, float y)
             selected_wall->color[1] = wall_color[1];
             selected_wall->color[2] = wall_color[2];
             selected_wall->is_colored = true;
+            selected_wall->texture_index = cur_texture_index;
             return;
         }
     }
@@ -142,43 +143,85 @@ int Level::wall_is_present (const wall& wall)
 
 int Level::save_level (std::ofstream &outfile)
 {
+    std::vector<uint16_t> texture_list_description;
+    uint64_t data_decompressed_size = 0, texture_list_size;
+    for (size_t i = 0; i < texture_list.size (); i++) {
+        texture_list_description.push_back (strlen (texture_list[i].c_str()));
+        data_decompressed_size += texture_list_description[i];
+    }
+    texture_list_size = data_decompressed_size;
+    data_decompressed_size += sizeof (wall) * walls.size ();
+    data_decompressed_size += sizeof (uint16_t) * texture_list_description.size();
     level_fileheader fileheader;
     fileheader.walls_size = sizeof (wall) * walls.size ();
+    fileheader.texture_list_description_size = sizeof (uint16_t) * texture_list_description.size();
     fileheader.prev_prev_prev_x = prev_prev_prev_x;
     fileheader.prev_prev_prev_y = prev_prev_prev_y;
     fileheader.prev_prev_x = prev_prev_x;
     fileheader.prev_prev_y = prev_prev_y;
     fileheader.prev_x = prev_x;
     fileheader.prev_y = prev_y;
-    std::vector<pos_t> walls_compressed = compress((char *) walls.data(), fileheader.walls_size);
-    fileheader.walls_codon_count = walls_compressed.size();
-    unsigned char* walls_packed = nullptr;
-    size_t walls_pck_size = pack(walls_compressed, &walls_packed);
+    //data preparation for compression
+    char *data_decompressed = new char[data_decompressed_size];
+    uint64_t offset = 0;
+    //walls
+    memcpy (data_decompressed + offset, &walls[0], fileheader.walls_size);
+    offset += fileheader.walls_size;
+    //texture_list_description
+    memcpy (data_decompressed + offset, &texture_list_description[0], fileheader.texture_list_description_size);
+    offset += fileheader.texture_list_description_size;
+    //texture_list
+    for (size_t i = 0; i < texture_list.size (); i++) {
+        memcpy (data_decompressed + offset, texture_list[i].c_str(), texture_list_description[i]);
+        offset += texture_list_description[i];
+    }
+    emit print_console ("Preparing data finished: size = " + std::to_string (data_decompressed_size));
+    //compression
+    std::vector<pos_t> data_compressed = compress(data_decompressed, data_decompressed_size);
+    fileheader.data_codon_count = data_compressed.size();
+    unsigned char* data_packed = nullptr;
+    size_t data_pck_size = pack(data_compressed, &data_packed);
+    fileheader.data_compressed_size = data_pck_size;
+    fileheader.data_decompressed_size = data_decompressed_size;
+    //write
     outfile.write ((char *) &fileheader, sizeof (level_fileheader));
-    outfile.write ((char *) walls_packed, walls_pck_size);
+    outfile.write ((char *) data_packed, data_pck_size);
+    //outfile.write (data_decompressed, data_decompressed_size);
+    delete[] data_decompressed;
     outfile.flush ();
-    delete [] walls_packed;
+    delete [] data_packed;
     emit print_console ("Level saved. Header: " + std::to_string (sizeof (level_fileheader)) +
                         " bytes. Walls: " + std::to_string (fileheader.walls_size) + " bytes." +
-                        "\n codon count(walls) = " + std::to_string(fileheader.walls_codon_count));
+                        "\n           texture_list + description: " + std::to_string (texture_list_size + fileheader.texture_list_description_size) +
+                        " bytes. Codon count (all data) = " + std::to_string(fileheader.data_codon_count));
     return 0;
 }
 
-int Level::load_level (std::ifstream &infile, size_t file_size)
+int Level::load_level (std::ifstream &infile)
 {
     level_fileheader fileheader;
-    int ret = load_level_common (fileheader, walls, infile, file_size);
+    int ret = load_level_common (fileheader, walls, texture_list, infile);
     switch (ret) {
     case ERR_FILETYPE:
         emit print_console ("ERROR: wrong filetype or major version");
-        break;
+        return ret;
     case ERR_VERSION:
         emit print_console ("ERROR: wrong version");
+        return ret;
+    case ERR_COMPRESS:
+        emit print_console ("ERROR: compression failed");
+        return ret;
+    case ERR_DECOMPRESS:
+        emit print_console ("ERROR: decompression failed");
+        return ret;
+    case 0:
         break;
     default:
-        break;
+        emit print_console ("ERROR: unknown error");
+        return ret;
     }
     emit print_console ("loading " + std::to_string (walls.size () * sizeof (wall)) + " bytes to walls[]");
+    emit print_console ("loading " + std::to_string (texture_list.size () * sizeof (wall)) + " bytes to texture_list[]");
     selected_wall = nullptr;
     prev_prev_prev_x = fileheader.prev_prev_prev_x;
     prev_prev_prev_y = fileheader.prev_prev_prev_y;
@@ -218,4 +261,16 @@ void Level::ctrl_z ()
         std::swap (prev_prev_x, prev_x);
         std::swap (prev_prev_y, prev_y);
     }
+}
+
+void Level::select_texture (const std::string tex_filename)
+{
+    for (size_t i = 0; i < texture_list.size (); i++) {
+        if (tex_filename == texture_list[i]) {
+            cur_texture_index = i;
+            return;
+        }
+    }
+    texture_list.push_back (tex_filename);
+    cur_texture_index = texture_list.size () - 1;
 }

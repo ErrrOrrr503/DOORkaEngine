@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cstring>
 #include <filesystem>
+#include <iostream>
 #include "compress.h"
 namespace fs = std::filesystem;
 
@@ -27,6 +28,10 @@ namespace fs = std::filesystem;
 //! Describe pls.
 #define ERR_FILEOPEN 2
 //! Describe pls.
+#define ERR_DECOMPRESS 3
+//! Describe pls.
+#define ERR_COMPRESS 4
+//! Describe pls.
 //</ERROR_CODES>
 
 //<LEVEL_DIMENSIONS for coordinate system>
@@ -39,18 +44,30 @@ namespace fs = std::filesystem;
 #define DEF_WALL_COLOR_B 0.0
 //</LEVEL_DIMENSIONS for coordinate system>
 
+/*
+ * Level file:  {{}} - compression
+ *        <fileheader>
+ * names: {{<walls>    <texture_list_description>   <texture_list>}}
+ * types: {{<<wall>[]>        <uint16_t[]>         <char[], no \0>}}
+ *
+ * texture_list is a vector of texture filenames(strings) => each element has dynamic size and can't be read, so
+ * texture_list_description is a vector of sizes (uint16_t) of corresponding elements in lexture_list
+*/
+
 struct level_fileheader {
 //common data:
-    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00003";
-    uint32_t version = 1;
+    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00004";
+    uint32_t version = 4;
     uint64_t walls_size; // in bytes
-    uint64_t other_size;
+    uint64_t texture_list_description_size;
 //editor only data:
     float prev_x = 0, prev_y = 0;
     float prev_prev_x = 0, prev_prev_y = 0;
     float prev_prev_prev_x = 0, prev_prev_prev_y = 0;
 // compressor only data
-    uint64_t walls_codon_count;
+    uint64_t data_codon_count;
+    uint64_t data_decompressed_size;
+    uint64_t data_compressed_size;
 };
 
 /*!
@@ -67,6 +84,7 @@ struct wall {
     float x1 = 0, y1 = 0, zlo1 = 0, zhi1 = DEF_WALL_HEIGHT;
     float x2 = 0, y2 = 0, zlo2 = 0, zhi2 = DEF_WALL_HEIGHT;
     float color[3] = {DEF_WALL_COLOR_R, DEF_WALL_COLOR_G, DEF_WALL_COLOR_B};
+    int32_t texture_index = -1;  // -1 no texture; 0-32767 texture index in
     bool is_colored = false;
 };
 
@@ -78,7 +96,9 @@ struct wall {
  * \details Walls vector should be initialized but not necessarily pre-allocated.
  * If stored, all data in the vector will be destroyed and replaced by level data.
  */
-int load_level_common (std::vector<wall> &walls, std::ifstream &infile, size_t file_size);
-int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::ifstream &infile, size_t file_size);
+int load_level_common (std::vector<wall> &walls, std::vector<std::string> &texture_list,
+                       std::ifstream &infile);
+int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::vector<std::string> &texture_list,
+                       std::ifstream &infile);
 
 #endif // LEVEL_COMMON_H

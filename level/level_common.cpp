@@ -1,13 +1,15 @@
 #include "level_common.h"
 #include <iostream>
 
-int load_level_common (std::vector<wall> &walls, std::ifstream &infile, size_t file_size)
+int load_level_common (std::vector<wall> &walls, std::vector<std::string> &texture_list,
+                       std::ifstream &infile)
 {
     level_fileheader temp;
-    return load_level_common (temp, walls, infile, file_size);
+    return load_level_common (temp, walls, texture_list, infile);
 }
 
-int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::ifstream &infile, size_t file_size)
+int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, std::vector<std::string> &texture_list,
+                       std::ifstream &infile)
 {
     fileheader.filetype[0] = 0;
     level_fileheader reference_fileheader;
@@ -18,13 +20,39 @@ int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, s
         return ERR_VERSION;
         //fixme on compatible version
     }
-    size_t data_size = file_size - sizeof (level_fileheader);
-    unsigned char* walls_packed = new unsigned char[data_size];
-    infile.read((char *) walls_packed, data_size);
-    pos_t* walls_compressed = unpack(fileheader.walls_codon_count, walls_packed);
-    delete [] walls_packed;
+    //decompress
+    unsigned char* data_packed = new unsigned char[fileheader.data_compressed_size];
+    infile.read((char *) data_packed, fileheader.data_compressed_size);
+    pos_t* data_compressed = unpack(fileheader.data_codon_count, data_packed);
+    delete [] data_packed;
+    char* data_decompressed = new char[fileheader.data_decompressed_size];
+    int state = decompress(data_compressed, fileheader.data_codon_count, data_decompressed);
+    if (state != COMP_OK)
+        return ERR_DECOMPRESS;
+    //init structs
+    size_t offset = 0;
+    //walls
     walls.clear ();
     walls.resize (fileheader.walls_size / sizeof (wall));
-    int state = decompress(walls_compressed, fileheader.walls_codon_count, (char *) &walls[0]);
-    return state;
+    memcpy (&walls[0], data_decompressed + offset, fileheader.walls_size);
+    offset += fileheader.walls_size;
+
+    //from now crunch starts
+    //texture_list_description
+    std::vector<uint16_t> texture_list_description;
+    texture_list_description.resize (fileheader.texture_list_description_size / sizeof (uint16_t));
+    memcpy (&texture_list_description[0], data_decompressed + offset, fileheader.texture_list_description_size);
+    offset += fileheader.texture_list_description_size;
+    //texture_list
+    texture_list.clear ();
+    for (size_t i = 0; i < texture_list_description.size (); i++) {
+        //assuming that std::string contains an array of N symbols and termination null is awful for cross-platform and not
+        //switching to char*: file stores char* and load/save make convertions, however strlen(c_str) may be != size(): utf8, utf16, utf9146
+        char *temp_str = new char[texture_list_description[i] + 1]; //terminating 0;
+        memcpy (temp_str, data_decompressed + offset, texture_list_description[i] / sizeof(char));
+        texture_list.push_back (std::string (temp_str));
+        offset += texture_list_description[i] / sizeof(char);
+        delete[] temp_str;
+    }
+    return 0;
 }

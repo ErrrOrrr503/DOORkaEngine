@@ -16,6 +16,9 @@ int main (int argc, char **argv)
     }
     //now level is loaded
     Render render (level);
+    if (render.status () != ok) {
+        std::cerr << "Problem with render, exiting" << std::endl;
+    }
     while (render.status () != should_close) {
         render.draw ();
         glfwPollEvents ();

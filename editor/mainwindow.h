@@ -43,6 +43,8 @@ private slots:
     void on_clippingButton_clicked();
     void on_actionRevert_chandes_triggered();
 
+    void on_sel_textureButton_clicked();
+
 signals:
     void ogl_change_mode (edit_mode in_mode);
 

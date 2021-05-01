@@ -80,7 +80,7 @@ public:
      * \param infile Open input file stream
      * \return 0 or non-zero error code.
      */
-    int load_level (std::ifstream &infile, size_t file_size);
+    int load_level (std::ifstream &infile);
     /*!
      * \brief Change delta value.
      * \param value
@@ -93,6 +93,7 @@ public:
      */
     void swap_triangle_sides ();
     void ctrl_z ();
+    void select_texture (const std::string tex_filename);
     //! Vector where all level wall objects are stored. Unsorted.
     std::vector<wall> walls;
     /*!
@@ -116,6 +117,8 @@ private:
     int wall_is_present (const wall &wall);
     void add_wall (float x1, float y1, float x2, float y2);
 
+    std::vector<std::string> texture_list;
+    int32_t cur_texture_index = -1;
     std::vector<dot> dots;
 
 signals:
