@@ -230,6 +230,8 @@ void MainWindow::on_color_selected (const QColor &newcolor)
     level.wall_color[0] = newcolor.redF ();
     level.wall_color[1] = newcolor.greenF ();
     level.wall_color[2] = newcolor.blueF ();
+    level.cur_texture_index = -1;
+    ui->texture_label->clear ();
 }
 
 void MainWindow::on_actionRevert_chandes_triggered()

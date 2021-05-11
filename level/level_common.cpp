@@ -1,6 +1,43 @@
 #include "level_common.h"
 #include <iostream>
 
+wall::wall (float new_x1, float new_y1, float new_x2, float new_y2){
+    x1 = new_x1;
+    y1 = new_y1;
+    x2 = new_x2;
+    y2 = new_y2;
+    float norm = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+    if ( (x1 - x2) >= 0 ){
+        normal_y = (x1 - x2)/norm;
+        normal_x = (y2 - y1)/norm;
+    }
+    else {
+        normal_y = (x2 - x1)/norm;
+        normal_x = (y1 - y2)/norm;
+    }
+    color[0] = DEF_WALL_COLOR_R;
+    color[1] = DEF_WALL_COLOR_G;
+    color[2] = DEF_WALL_COLOR_B;
+}
+
+wall::wall () {
+    x1 = 0;
+    y1 = 0;
+    x2 = 0;
+    y2 = 0;
+    zlo1 = 0;
+    zlo2 = 0;
+    zhi1 = DEF_WALL_HEIGHT;
+    zhi2 = DEF_WALL_HEIGHT;
+    normal_x = 0;
+    normal_y = 0;
+    color[0] = DEF_WALL_COLOR_R;
+    color[1] = DEF_WALL_COLOR_G;
+    color[2] = DEF_WALL_COLOR_B;
+    texture_index = -1;
+    is_colored = false;
+}
+
 int load_level_common (std::vector<wall> &walls, std::vector<std::string> &texture_list,
                        std::ifstream &infile)
 {

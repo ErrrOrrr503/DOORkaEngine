@@ -112,13 +112,13 @@ public:
     float prev_prev_x = 0, prev_prev_y = 0;
     float prev_prev_prev_x = 0, prev_prev_prev_y = 0;
     triangle_side_mode trig_side_mode = one_side;
+    int32_t cur_texture_index = -1;
 
 private:
     int wall_is_present (const wall &wall);
     void add_wall (float x1, float y1, float x2, float y2);
 
     std::vector<std::string> texture_list;
-    int32_t cur_texture_index = -1;
     std::vector<dot> dots;
 
 signals:
