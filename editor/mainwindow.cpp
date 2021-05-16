@@ -33,11 +33,6 @@ MainWindow::~MainWindow()
     outfile.close();
 }
 
-void MainWindow::keyPressEvent (QKeyEvent *ke)
-{
-
-}
-
 void MainWindow::on_drawButton_clicked()
 {
     change_mode (draw);

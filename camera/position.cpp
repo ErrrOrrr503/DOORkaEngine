@@ -1,6 +1,6 @@
 #include "position.h"
 
-player_position::player_position(GLFWwindow* window) :
+player_position::player_position(GLFWwindow* window, const Level& level) :
     window_(window),
     location_(glm::vec3(0.0f, 0.0f, 0.1f)),
     direction_(glm::vec3(0.0f, 0.0f, -1.0f)),
@@ -14,9 +14,11 @@ player_position::player_position(GLFWwindow* window) :
     elapsed_time_(0.0f),
     last_frame_(0.0f),
     keys_()
-{}
+{
+    bsp_main_node = new bsp::bsp_tree_wall (level.walls);
+}
 
-player_position::player_position(GLFWwindow* window, glm::vec3 start_locationv, glm::vec3 start_directionv) :
+player_position::player_position(GLFWwindow* window, const Level& level, glm::vec3 start_locationv, glm::vec3 start_directionv) :
     window_(window),
     location_(start_locationv),
     direction_(start_directionv),
@@ -30,22 +32,45 @@ player_position::player_position(GLFWwindow* window, glm::vec3 start_locationv, 
     elapsed_time_(0.0f),
     last_frame_(0.0f),
     keys_()
-{}
+{
+    bsp_main_node = new bsp::bsp_tree_wall (level.walls);
+}
+
+player_position::~player_position ()
+{
+    delete bsp_main_node;
+}
 
 void player_position::relocateView()
 {
+    glm::vec3 new_location = location_;
     if (glfwGetKey(window_, keys_.mv_fwd) == GLFW_PRESS)
-        location_ += lin_velocity_ * (GLfloat)elapsed_time_
+        new_location += lin_velocity_ * (GLfloat)elapsed_time_
         * glm::vec3(sinf(course_), cosf(course_), 0.0f);
     if (glfwGetKey(window_, keys_.mv_bck) == GLFW_PRESS)
-        location_ -= lin_velocity_ * (GLfloat)elapsed_time_
+        new_location -= lin_velocity_ * (GLfloat)elapsed_time_
         * glm::vec3(sinf(course_), cosf(course_), 0.0f);
     if (glfwGetKey(window_, keys_.mv_left) == GLFW_PRESS)
-        location_ -= glm::normalize(glm::cross(direction_, world_up_))
+        new_location -= glm::normalize(glm::cross(direction_, world_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
     if (glfwGetKey(window_, keys_.mv_right) == GLFW_PRESS)
-        location_ += glm::normalize(glm::cross(direction_, world_up_))
+        new_location += glm::normalize(glm::cross(direction_, world_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
+
+    int number_of_collized_walls = 0;
+    glm::vec2 forbidden_direction;
+    bsp_main_node->check_level_collision(&forbidden_direction, &number_of_collized_walls, 
+                                         location_.x * CELL_SIZE, location_.y * CELL_SIZE, 
+                                         new_location.x * CELL_SIZE, new_location.y * CELL_SIZE);
+    if (number_of_collized_walls == 0)
+        location_ = new_location;
+    if (number_of_collized_walls == 1){
+        glm::vec2 delta (new_location.x - location_.x, new_location.y - location_.y);
+        float scalar_mul = delta.x*forbidden_direction.x + delta.y*forbidden_direction.y;
+        location_.x += delta.x - forbidden_direction.x*scalar_mul;
+        location_.y += delta.y - forbidden_direction.y*scalar_mul;
+    }
+
     
     if (!keyboard_rotation_enabled_)
         return;

@@ -44,7 +44,7 @@ GLuint Textures::operator[] (size_t i)
     return texture_names_list_[i];
 }
 
-Render::Render (Level &level)
+Render::Render (const Level &level)
 {
     //fixme: start position of cam in level, will use (0 0 0) (1 0 0) instead
     level_ = &level;
@@ -69,7 +69,7 @@ Render::Render (Level &level)
         status_ = err_glew;
     }
     draw_mode_ = gl12; //fixme: different renders according to hw, same interface;
-    gPos = new player_position (window_, glm::vec3 (0, 0, 25.0 / CELL_SIZE), glm::vec3 (1, 0, 0));
+    gPos = new player_position (window_, level, glm::vec3 (10, 10, 25.0 / CELL_SIZE), glm::vec3 (1, 0, 0));
     gPos->setMouseSensitivity(0.005f);
     gCamera = new camera(window_, gPos);
     glEnable (GL_DEPTH_TEST);

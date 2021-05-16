@@ -28,7 +28,6 @@ private:
     void open_file_dialog(flag_saveload flag);
 
 private slots:
-    void keyPressEvent (QKeyEvent *ke);
     void print_console (const std::string &s);
     void on_drawButton_clicked();
     void on_selectButton_clicked();

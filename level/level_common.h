@@ -40,9 +40,9 @@ namespace fs = std::filesystem;
 #define LEVEL_Y 10000
 #define CELL_SIZE 50
 #define DEF_WALL_HEIGHT 50
-#define DEF_WALL_COLOR_R 0.2
-#define DEF_WALL_COLOR_G 0.8
-#define DEF_WALL_COLOR_B 0.0
+#define DEF_WALL_COLOR_R 0.2f
+#define DEF_WALL_COLOR_G 0.8f
+#define DEF_WALL_COLOR_B 0.0f
 //</LEVEL_DIMENSIONS for coordinate system>
 
 /*
@@ -84,6 +84,7 @@ struct level_fileheader {
 struct wall {
     wall ();
     wall (float new_x1, float new_y1, float new_x2, float new_y2);
+    wall (float new_x1, float new_y1, float new_x2, float new_y2, bool is_colored);
     float x1 = 0, y1 = 0, zlo1 = 0, zhi1 = DEF_WALL_HEIGHT;
     float x2 = 0, y2 = 0, zlo2 = 0, zhi2 = DEF_WALL_HEIGHT;
     float normal_x = 0, normal_y = 0;

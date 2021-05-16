@@ -18,6 +18,27 @@ wall::wall (float new_x1, float new_y1, float new_x2, float new_y2){
     color[0] = DEF_WALL_COLOR_R;
     color[1] = DEF_WALL_COLOR_G;
     color[2] = DEF_WALL_COLOR_B;
+    is_colored = true;
+}
+
+wall::wall (float new_x1, float new_y1, float new_x2, float new_y2, bool is_colored) {
+    x1 = new_x1;
+    y1 = new_y1;
+    x2 = new_x2;
+    y2 = new_y2;
+    float norm = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+    if ( (x1 - x2) >= 0 ){
+        normal_y = (x1 - x2)/norm;
+        normal_x = (y2 - y1)/norm;
+    }
+    else {
+        normal_y = (x2 - x1)/norm;
+        normal_x = (y1 - y2)/norm;
+    }
+    color[0] = DEF_WALL_COLOR_R;
+    color[1] = DEF_WALL_COLOR_G;
+    color[2] = DEF_WALL_COLOR_B;
+    this->is_colored = is_colored;
 }
 
 wall::wall () {
@@ -61,9 +82,10 @@ int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, s
     unsigned char* data_packed = new unsigned char[fileheader.data_compressed_size];
     infile.read((char *) data_packed, fileheader.data_compressed_size);
     pos_t* data_compressed = unpack(fileheader.data_codon_count, data_packed);
-    delete [] data_packed;
+    delete[] data_packed;
     char* data_decompressed = new char[fileheader.data_decompressed_size];
     int state = decompress(data_compressed, fileheader.data_codon_count, data_decompressed);
+    delete[] data_compressed;
     if (state != COMP_OK)
         return ERR_DECOMPRESS;
     //init structs
@@ -91,5 +113,6 @@ int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, s
         offset += texture_list_description[i] / sizeof(char);
         delete[] temp_str;
     }
+    delete[] data_decompressed;
     return 0;
 }

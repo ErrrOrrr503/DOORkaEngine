@@ -99,19 +99,7 @@ void Level::add_wall_trio_clipping (float x, float y)
 
 void Level::add_wall (float x1, float y1, float x2, float y2)
 {
-    wall temp_wall;
-    if (x1 < x2) {
-        temp_wall.x1 = x1;
-        temp_wall.y1 = y1;
-        temp_wall.x2 = x2;
-        temp_wall.y2 = y2;
-    }
-    else {
-        temp_wall.x1 = x2;
-        temp_wall.y1 = y2;
-        temp_wall.x2 = x1;
-        temp_wall.y2 = y1;
-    }
+    wall temp_wall (x1, y1, x2, y2, false);
     walls.push_back (temp_wall);
 }
 
