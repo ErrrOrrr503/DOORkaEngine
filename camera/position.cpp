@@ -57,20 +57,9 @@ void player_position::relocateView()
         new_location += glm::normalize(glm::cross(direction_, world_up_))
         * lin_velocity_ * (GLfloat)elapsed_time_;
 
-    int number_of_collized_walls = 0;
-    glm::vec2 forbidden_direction;
-    bsp_main_node->check_level_collision(&forbidden_direction, &number_of_collized_walls, 
-                                         location_.x * CELL_SIZE, location_.y * CELL_SIZE, 
-                                         new_location.x * CELL_SIZE, new_location.y * CELL_SIZE);
-    if (number_of_collized_walls == 0)
-        location_ = new_location;
-    if (number_of_collized_walls == 1){
-        glm::vec2 delta (new_location.x - location_.x, new_location.y - location_.y);
-        float scalar_mul = delta.x*forbidden_direction.x + delta.y*forbidden_direction.y;
-        location_.x += delta.x - forbidden_direction.x*scalar_mul;
-        location_.y += delta.y - forbidden_direction.y*scalar_mul;
-    }
-
+    new_location *= (float) CELL_SIZE;
+    bsp_main_node->check_level_collision (location_ * (float) CELL_SIZE, new_location);
+    location_ = new_location / (float) CELL_SIZE;
     
     if (!keyboard_rotation_enabled_)
         return;
