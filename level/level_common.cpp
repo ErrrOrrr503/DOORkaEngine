@@ -109,6 +109,7 @@ int load_level_common (level_fileheader &fileheader, std::vector<wall> &walls, s
         //switching to char*: file stores char* and load/save make convertions, however strlen(c_str) may be != size(): utf8, utf16, utf9146
         char *temp_str = new char[texture_list_description[i] + 1]; //terminating 0;
         memcpy (temp_str, data_decompressed + offset, texture_list_description[i] / sizeof(char));
+        temp_str[texture_list_description[i] / sizeof(char)] = 0;
         texture_list.push_back (std::string (temp_str));
         offset += texture_list_description[i] / sizeof(char);
         delete[] temp_str;

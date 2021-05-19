@@ -19,36 +19,32 @@ void find_same_point(const wall& wall1, const wall& wall2, float* same_x, float*
     *same_y = finded_y;
 }
 
-int check_point_position (const wall& splitter_wall, float point_x, float point_y){
-    float normal_x = splitter_wall.normal_x;
-    float normal_y = splitter_wall.normal_y;
-    float scalar_mul = normal_x*(splitter_wall.x1 - point_x) + normal_y*(splitter_wall.y1 - point_y);
-    if (scalar_mul > 0)
+int check_point_position (const wall& splitter_wall, float point_x, float point_y) {
+    float scalar_mul = splitter_wall.normal_x*(splitter_wall.x1 - point_x) + 
+                       splitter_wall.normal_y*(splitter_wall.y1 - point_y);
+    //std::cout << "scalar_mul = " << scalar_mul << std::endl;
+    if (float_compare (scalar_mul, 0) == 1)
         return 1;
-    else
+    if (float_compare (scalar_mul, 0) == -1)
         return -1;
+    return 0;
 }
 int check_wall_position (const wall& splitter_wall, const wall& checked_wall){
     //fixme: parallel walls
     int first_point_position = check_point_position(splitter_wall, checked_wall.x1, checked_wall.y1);
     int second_point_position = check_point_position(splitter_wall, checked_wall.x2, checked_wall.y2);
-    if ((checked_wall.x1 == splitter_wall.x1 && checked_wall.y1 == splitter_wall.y1) ||
-        (checked_wall.x1 == splitter_wall.x2 && checked_wall.y1 == splitter_wall.y2))
-    {
+    if (first_point_position == 0)
         first_point_position = second_point_position;
-    }
-    if ((checked_wall.x2 == splitter_wall.x1 && checked_wall.y2 == splitter_wall.y1) ||
-        (checked_wall.x2 == splitter_wall.x2 && checked_wall.y2 == splitter_wall.y2))
-    {
+    if (second_point_position == 0)
         second_point_position = first_point_position;
-    }
+    //std::cout << "fp = " << first_point_position << " sp = " << second_point_position << std::endl;
     if (first_point_position == 1 && second_point_position == 1)
-        return 1;
+        return 1; //one side
     if (first_point_position == -1 && second_point_position == -1)
-        return -1;
-    if (first_point_position*second_point_position < 0)
-        return 2;
-    return 2;
+        return -1; //other side
+    if (first_point_position * second_point_position < 0)
+        return 2; //cross
+    return 3; // ambiguous
 }
 
 bsp_tree_wall::~bsp_tree_wall() {
@@ -80,6 +76,11 @@ bsp_tree_wall::bsp_tree_wall (const std::vector<wall> &level) {
             front_walls.push_back(checked_wall);
         if (wall_position == -1)
             back_walls.push_back(checked_wall);
+        if (wall_position == 3) {
+            std::cout << "BOOOOOOOO" << std::endl;
+            back_walls.push_back(checked_wall);
+            front_walls.push_back(checked_wall);
+        }
         if (wall_position == 2){
             std::cout << "splitting: (" << checked_wall.x1 << ", " << checked_wall.y1 << ") ("
                                         << checked_wall.x2 << ", " << checked_wall.y2 << ")" << std::endl;
@@ -88,14 +89,20 @@ bsp_tree_wall::bsp_tree_wall (const std::vector<wall> &level) {
             find_same_point (splitter_wall, checked_wall, &same_x, &same_y);
             wall new_wall1 (checked_wall.x1, checked_wall.y1, same_x, same_y);
             wall new_wall2 (same_x, same_y, checked_wall.x2, checked_wall.y2);
-            if (check_point_position(splitter_wall, checked_wall.x1, checked_wall.y1) == 1){
+            if (check_point_position(splitter_wall, checked_wall.x1, checked_wall.y1) == 1) {
                 front_walls.push_back(new_wall1);
                 back_walls.push_back(new_wall2);
             }
-            else {
+            if (check_point_position(splitter_wall, checked_wall.x1, checked_wall.y1) == -1) {
                 front_walls.push_back(new_wall2);
                 back_walls.push_back(new_wall1);
-            }         
+            }
+            if (check_point_position(splitter_wall, checked_wall.x1, checked_wall.y1) == 0) {
+                front_walls.push_back(new_wall2);
+                back_walls.push_back(new_wall1);
+                front_walls.push_back(new_wall1);
+                back_walls.push_back(new_wall2);
+            }
         }
     }
     std::cout << "adding: (" << splitter_wall.x1 << ", " << splitter_wall.y1 << ") ("
@@ -161,48 +168,87 @@ int check_two_lines_collision(float line1_x1, float line1_y1, float line1_x2, fl
 
 int bsp_tree_wall::check_level_collision (const glm::vec3 &pos, glm::vec3 &new_pos)
 {
-    int collised_walls_number = 0;
-    return check_level_collision (pos, new_pos, collised_walls_number);
+    wall temp_collised_wall;
+    int collised_walls_num = 0;
+    check_level_collision (pos, new_pos, temp_collised_wall, collised_walls_num);
+    if (collised_walls_num == 1)
+        check_level_collision (pos, new_pos, temp_collised_wall, collised_walls_num);
+    return 0;
 }
 
-int bsp_tree_wall::check_level_collision(const glm::vec3 &pos, glm::vec3 &new_pos, int &collised_walls_number){
+int bsp_tree_wall::check_level_collision (const glm::vec3 &pos, glm::vec3 &new_pos, wall &collised_wall, int &collised_walls_num){
     glm::vec2 forbidden_direction;
     int ret;
     if ((ret = check_wall_collision (forbidden_direction, node_wall, pos, new_pos))) {
-        std::cout << "COLLISION! with wall (" << node_wall.x1 << ", " << node_wall.y1 << ") ("
-                                              << node_wall.x2 << ", " << node_wall.y2 << ")" << std::endl;
-        if (ret == 1)
-            collised_walls_number++;
-        if (collised_walls_number == 2) {
+        //std::cout << "COLLISION! with wall (" << node_wall.x1 << ", " << node_wall.y1 << ") ("
+        //                                      << node_wall.x2 << ", " << node_wall.y2 << ")" << std::endl;
+        if (ret == 1) {
+            if (collised_walls_num == 0) { // first collision
+                collised_walls_num++;
+                collised_wall = node_wall;
+            }
+            else { // second true or false collision
+                int is_other_wall = float_compare (collised_wall.x1, node_wall.x1) | float_compare (collised_wall.y1, node_wall.y1) |
+                                    float_compare (collised_wall.x2, node_wall.x2) | float_compare (collised_wall.y2, node_wall.y2);
+                if (is_other_wall) { // second true collision
+                    collised_walls_num++;
+                }
+                // false collision is ignored
+            }
+        }
+        if (collised_walls_num == 2) {
             new_pos = pos;
             return 0;
         }
+
+        //no collision yet or false dual wall collision
+
         glm::vec3 allowed_direction (forbidden_direction.y, -forbidden_direction.x, 0);
         glm::vec3 delta (new_pos.x - pos.x, new_pos.y - pos.y, new_pos.z - pos.z);
         glm::vec3 allowed_delta = allowed_direction * (delta.x * allowed_direction.x + delta.y * allowed_direction.y);
         new_pos = pos + allowed_delta;
 
-        std::cout << "forbidden_direction (" << forbidden_direction.x << ", " << forbidden_direction.y << ")"
-                  << "allowed_direction (" << allowed_direction.x << ", " << allowed_direction.y << ")" << std::endl;
-        std::cout << "delta (" << delta.x << ", " << delta.y << ") allowed_delta (" << allowed_delta.x << ", " << allowed_delta.y << ")" << std::endl;
+       // std::cout << "forbidden_direction (" << forbidden_direction.x << ", " << forbidden_direction.y << ")"
+       //           << "allowed_direction (" << allowed_direction.x << ", " << allowed_direction.y << ")" << std::endl;
+       // std::cout << "delta (" << delta.x << ", " << delta.y << ") allowed_delta (" << allowed_delta.x << ", " << allowed_delta.y << ")" << std::endl;
     }
     else {
 
     }
     
     int position_flag = check_point_position(node_wall, pos.x, pos.y);
-    if (position_flag == 1){
-        if (front_bsp_tree == nullptr)
-            return 0;
-        else
-            front_bsp_tree -> check_level_collision(pos, new_pos, collised_walls_number);
+    if (position_flag == 1) {
+        if (front_bsp_tree != nullptr)
+            front_bsp_tree -> check_level_collision(pos, new_pos, collised_wall, collised_walls_num);
     }
-    if (position_flag == -1){
-        if (back_bsp_tree == nullptr)
-            return 0;
-        else
-            back_bsp_tree -> check_level_collision(pos, new_pos, collised_walls_number);
+    if (position_flag == -1) {
+        if (back_bsp_tree != nullptr)
+            back_bsp_tree -> check_level_collision(pos, new_pos, collised_wall, collised_walls_num);
     }
+    
+    if (position_flag == 0) { // nearly impossible due to epsilon
+        std::cout << "FUUUU" <<std::endl;
+        if (back_bsp_tree != nullptr)
+            back_bsp_tree -> check_level_collision(pos, new_pos, collised_wall, collised_walls_num);
+        if (front_bsp_tree != nullptr)
+            front_bsp_tree -> check_level_collision(pos, new_pos, collised_wall, collised_walls_num);
+    }
+    return 0;
+}
+
+int float_compare (float a1, float a2) {
+    if (a1 - a2 > 0.00001)
+        return 1;
+    if (a1 - a2 < -0.00001)
+        return -1;
+    return 0;
+}
+
+int float_compare (float a1, float a2, float precision) {
+    if (a1 - a2 > precision)
+        return 1;
+    if (a1 - a2 < -precision)
+        return -1;
     return 0;
 }
 

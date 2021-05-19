@@ -115,7 +115,7 @@ public:
     float prev_x = 0, prev_y = 0;
     float prev_prev_x = 0, prev_prev_y = 0;
     float prev_prev_prev_x = 0, prev_prev_prev_y = 0;
-    float start_position[3] = {0, 0, 0};
+    float start_position[3] = {0, 0, CELL_SIZE / 2};
     float start_direction[3] = {1, 0, 0};
     triangle_side_mode trig_side_mode = one_side;
     int32_t cur_texture_index = -1;

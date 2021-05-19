@@ -18,10 +18,11 @@ int Textures::init_gl12 (const Level &level)
     glGenTextures (level.texture_list.size (), texture_names_list_);
     for (size_t i = 0; i < level.texture_list.size (); i++) {
         int width = 0, height = 0;
+        std::cout << "Opening '" << textures_path_ + level.texture_list[i] << "'" << std::endl;
         GLubyte *raw_texture = SOIL_load_image ((textures_path_ + level.texture_list[i]).c_str (), &width, &height, 0, SOIL_LOAD_RGBA);
         if (raw_texture == NULL) {
             std::cerr << "Failed to load texture: '" << textures_path_ + level.texture_list[i] << "'" << std::endl;
-            return -1;
+            continue;
         }
         texture_resolutions_.push_back (texture_res(width, height));
         // bind

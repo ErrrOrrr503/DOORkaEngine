@@ -18,9 +18,11 @@ int main (int argc, char **argv)
     Render render (level);
     if (render.status () != ok) {
         std::cerr << "Problem with render, exiting" << std::endl;
+        return -1;
     }
     while (render.status () != should_close) {
         render.draw ();
         glfwPollEvents ();
     }
+    return 0;
 }
