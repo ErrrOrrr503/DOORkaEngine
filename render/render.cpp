@@ -69,7 +69,8 @@ Render::Render (const Level &level)
         status_ = err_glew;
     }
     draw_mode_ = gl12; //fixme: different renders according to hw, same interface;
-    gPos = new player_position (window_, level, glm::vec3 (10, 10, 25.0 / CELL_SIZE), glm::vec3 (1, 0, 0));
+    gPos = new player_position (window_, level, glm::vec3 (level.start_position[0] / CELL_SIZE, level.start_position[1] / CELL_SIZE, level.start_position[2] / CELL_SIZE),
+                                                glm::vec3 (level.start_direction[0], level.start_direction[1], level.start_direction[2]));
     gPos->setMouseSensitivity(0.005f);
     gCamera = new camera(window_, gPos);
     glEnable (GL_DEPTH_TEST);

@@ -44,6 +44,8 @@ private slots:
 
     void on_sel_textureButton_clicked();
 
+    void on_setPosButton_clicked();
+
 signals:
     void ogl_change_mode (edit_mode in_mode);
 

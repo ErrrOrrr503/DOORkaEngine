@@ -2,6 +2,7 @@
 #define LEVEL_COMMON_H
 //! \file level_common.h
 #include <cinttypes>
+#include <cfloat>
 #include <vector>
 #include <fstream>
 #include <cstring>
@@ -57,10 +58,12 @@ namespace fs = std::filesystem;
 
 struct level_fileheader {
 //common data:
-    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00004";
-    uint32_t version = 4;
+    char filetype[FILETYPE_DESCR_LEN] = "DOORkaEngine_v00005";
+    uint32_t version = 5;
     uint64_t walls_size; // in bytes
     uint64_t texture_list_description_size;
+    float start_position[3] = {0, 0, 0};
+    float start_direction[3] = {1, 0, 0};
 //editor only data:
     float prev_x = 0, prev_y = 0;
     float prev_prev_x = 0, prev_prev_y = 0;

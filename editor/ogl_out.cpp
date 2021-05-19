@@ -113,17 +113,19 @@ void oGL_out::mouseMoveEvent(QMouseEvent *me)
 void oGL_out::mousePressEvent(QMouseEvent *me)
 {
     flag_mouse_is_pressed = 1;
-    if (cursor.type == none)
-        cursor.type = plain;
+    if (cursor.mode == none)
+        cursor.mode = plain;
     cursor.set(me->localPos().x(), me->localPos().y(), height(), width(), center_x, center_y, z_angle, scale);
-    if (cursor.type == sel_mode)
+    if (cursor.mode == sel_mode)
         level->select_wall (cursor.cur_x, cursor.cur_y);
-    if (cursor.type == draw_mode)
+    if (cursor.mode == draw_mode)
         level->add_wall_trio (cursor.cur_x, cursor.cur_y);
-    if (cursor.type == draw_clipping_mode)
+    if (cursor.mode == draw_clipping_mode)
         level->add_wall_trio_clipping (cursor.cur_x, cursor.cur_y);
-    if (cursor.type == unsel_mode)
+    if (cursor.mode == unsel_mode)
         level->unselect_wall (cursor.cur_x, cursor.cur_y);
+    if (cursor.mode == set_pos_mode)
+        level->set_start_position (cursor.cur_x, cursor.cur_y, CELL_SIZE / 2);
     update();
 #ifdef DEBUG_DRAW
     emit print_console("mouse pointed to x = " + std::to_string(cursor.cur_x) + " y = " + std::to_string(cursor.cur_y));
@@ -151,42 +153,31 @@ void oGL_out::mouseReleaseEvent(QMouseEvent *me)
 
 void oGL_out::ogl_change_mode (edit_mode in_mode)
 {
-    switch (in_mode) {
-    case draw:
-        cursor.type = draw_mode;
-        break;
-    case draw_clipping:
-        cursor.type = draw_clipping_mode;
-        break;
-    case sel:
-        cursor.type = sel_mode;
-        break;
-    case unsel:
-        cursor.type = unsel_mode;
-        break;
-    default:
-        break;
-    }
+    cursor.mode = in_mode;
     update ();
 }
 
 void oGL_out::pointers_paint()
 {
     f30->glEnable(GL_POINT_SMOOTH);
-    if (cursor.type != none) {
+    if (cursor.mode != none) {
         f30->glPointSize(20);
         f30->glColor3f(1.0, 0.5, 0.0);
-        if (cursor.type  == sel_mode)
+        if (cursor.mode  == sel_mode)
             f30->glColor3fv(level->wall_color);
+        if (cursor.mode == set_pos_mode)
+            f30->glColor3f(0.2, 0.6, 0.7);
         f30->glBegin(GL_POINTS);
         f30->glVertex3f(cursor.cur_x, cursor.cur_y, 0);
         f30->glEnd();
         f30->glPointSize(10);
         f30->glColor3f(0.5, 0.25, 0.0);
-        if (cursor.type  == sel_mode)
+        if (cursor.mode  == sel_mode)
             f30->glColor3f(0.0, 0.25, 0.5);
-        if (cursor.type  == draw_clipping_mode)
+        if (cursor.mode  == draw_clipping_mode)
             f30->glColor3f(0.3, 0.5, 0.7);
+        if (cursor.mode == set_pos_mode)
+            f30->glColor3f(0.1, 0.3, 0.5);
         f30->glBegin(GL_POINTS);
         f30->glVertex3f(cursor.cur_x, cursor.cur_y, 0);
         f30->glEnd();
@@ -235,7 +226,7 @@ void oGL_out::level_paint()
     }
     f30->glEnd ();
 
-    if (cursor.type == draw_mode || cursor.type == draw_clipping_mode) {
+    if (cursor.mode == draw_mode || cursor.mode == draw_clipping_mode) {
         f30->glColor3f (FUTURE_WALL_COLOR_R, FUTURE_WALL_COLOR_G, FUTURE_WALL_COLOR_B);
         f30->glEnable (GL_LINE_STIPPLE);
         f30->glLineStipple (1, 0xF0F0);
@@ -252,10 +243,31 @@ void oGL_out::level_paint()
         f30->glLineWidth (3);
         f30->glColor3f (SELECTED_WALL_COLOR_R, SELECTED_WALL_COLOR_G, SELECTED_WALL_COLOR_B);
         f30->glBegin (GL_LINES);
-        glVertex2f (level->selected_wall->x1, level->selected_wall->y1);
-        glVertex2f (level->selected_wall->x2, level->selected_wall->y2);
+            f30->glVertex2f (level->selected_wall->x1, level->selected_wall->y1);
+            f30->glVertex2f (level->selected_wall->x2, level->selected_wall->y2);
         f30->glEnd ();
     }
+
+    f30->glLineWidth (3);
+    f30->glColor3f (0.6, 0.7, 0.0);
+    f30->glBegin (GL_LINES);
+        f30->glVertex2f (level->start_position[0], level->start_position[1]);
+        f30->glVertex2f (level->start_position[0] + CELL_SIZE / 2 * level->start_direction[0],
+                         level->start_position[1] + CELL_SIZE / 2 * level->start_direction[1]);
+        f30->glVertex2f (level->start_position[0] + CELL_SIZE / 2 * level->start_direction[0],
+                         level->start_position[1] + CELL_SIZE / 2 * level->start_direction[1]);
+        f30->glVertex2f (level->start_position[0] + CELL_SIZE / 4 * level->start_direction[0] - CELL_SIZE / 8 * level->start_direction[1],
+                         level->start_position[1] + CELL_SIZE / 4 * level->start_direction[1] + CELL_SIZE / 8 * level->start_direction[0]);
+        f30->glVertex2f (level->start_position[0] + CELL_SIZE / 2 * level->start_direction[0],
+                         level->start_position[1] + CELL_SIZE / 2 * level->start_direction[1]);
+        f30->glVertex2f (level->start_position[0] + CELL_SIZE / 4 * level->start_direction[0] + CELL_SIZE / 8 * level->start_direction[1],
+                         level->start_position[1] + CELL_SIZE / 4 * level->start_direction[1] - CELL_SIZE / 8 * level->start_direction[0]);
+    f30->glEnd ();
+    f30->glPointSize (10);
+    f30->glColor3f (0.9, 0.5, 0.0);
+    f30->glBegin (GL_POINTS);
+        glVertex2f (level->start_position[0], level->start_position[1]);
+    f30->glEnd ();
 }
 
 void oGL_out::test_paint()

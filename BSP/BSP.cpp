@@ -29,6 +29,7 @@ int check_point_position (const wall& splitter_wall, float point_x, float point_
         return -1;
 }
 int check_wall_position (const wall& splitter_wall, const wall& checked_wall){
+    //fixme: parallel walls
     int first_point_position = check_point_position(splitter_wall, checked_wall.x1, checked_wall.y1);
     int second_point_position = check_point_position(splitter_wall, checked_wall.x2, checked_wall.y2);
     if ((checked_wall.x1 == splitter_wall.x1 && checked_wall.y1 == splitter_wall.y1) ||
@@ -82,18 +83,15 @@ bsp_tree_wall::bsp_tree_wall (const std::vector<wall> &level) {
         if (wall_position == 2){
             std::cout << "splitting: (" << checked_wall.x1 << ", " << checked_wall.y1 << ") ("
                                         << checked_wall.x2 << ", " << checked_wall.y2 << ")" << std::endl;
-            wall new_wall1 = checked_wall;
-            wall new_wall2 = checked_wall;
             float same_x;
             float same_y;
             find_same_point (splitter_wall, checked_wall, &same_x, &same_y);
-            new_wall1. x1 = same_x;
-            new_wall1. y1 = same_y;
-            new_wall2. x2 = same_x;
-            new_wall2. y2 = same_y;
-            if (check_wall_position(splitter_wall, new_wall1) == 1){
+            wall new_wall1 (checked_wall.x1, checked_wall.y1, same_x, same_y);
+            wall new_wall2 (same_x, same_y, checked_wall.x2, checked_wall.y2);
+            if (check_point_position(splitter_wall, checked_wall.x1, checked_wall.y1) == 1){
                 front_walls.push_back(new_wall1);
-                back_walls.push_back(new_wall2);}
+                back_walls.push_back(new_wall2);
+            }
             else {
                 front_walls.push_back(new_wall2);
                 back_walls.push_back(new_wall1);

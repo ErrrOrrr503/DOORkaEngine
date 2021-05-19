@@ -149,6 +149,10 @@ int Level::save_level (std::ofstream &outfile)
     fileheader.prev_prev_y = prev_prev_y;
     fileheader.prev_x = prev_x;
     fileheader.prev_y = prev_y;
+    for (int i = 0; i < 3; i++) {
+        fileheader.start_direction[i] = start_direction[i];
+        fileheader.start_position[i] = start_position[i];
+    }
     //data preparation for compression
     char *data_decompressed = new char[data_decompressed_size];
     uint64_t offset = 0;
@@ -217,6 +221,10 @@ int Level::load_level (std::ifstream &infile)
     prev_prev_y = fileheader.prev_prev_y;
     prev_x = fileheader.prev_x;
     prev_y = fileheader.prev_y;
+    for (int i = 0; i < 3; i++) {
+        start_direction[i] = fileheader.start_direction[i];
+        start_position[i] = fileheader.start_position[i];
+    }
     return ret;
 }
 
@@ -261,4 +269,18 @@ void Level::select_texture (const std::string tex_filename)
     }
     texture_list.push_back (tex_filename);
     cur_texture_index = texture_list.size () - 1;
+}
+
+void Level::set_start_position (const float x, const float y, const float z)
+{
+    start_position[0] = x;
+    start_position[1] = y;
+    start_position[2] = z;
+}
+
+void Level::set_start_direction (const float x, const float y, const float z)
+{
+    start_position[0] = x;
+    start_position[1] = y;
+    start_position[2] = z;
 }
