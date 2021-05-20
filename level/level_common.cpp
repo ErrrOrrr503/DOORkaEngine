@@ -6,7 +6,7 @@ wall::wall (float new_x1, float new_y1, float new_x2, float new_y2){
     y1 = new_y1;
     x2 = new_x2;
     y2 = new_y2;
-    float norm = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+    float norm = sqrtf((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
     if ( (x1 - x2) >= 0 ){
         normal_y = (x1 - x2)/norm;
         normal_x = (y2 - y1)/norm;
@@ -21,12 +21,12 @@ wall::wall (float new_x1, float new_y1, float new_x2, float new_y2){
     is_colored = true;
 }
 
-wall::wall (float new_x1, float new_y1, float new_x2, float new_y2, bool is_colored) {
+wall::wall (float new_x1, float new_y1, float new_x2, float new_y2, bool flag_is_colored) {
     x1 = new_x1;
     y1 = new_y1;
     x2 = new_x2;
     y2 = new_y2;
-    float norm = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+    float norm = sqrtf((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
     if ( (x1 - x2) >= 0 ){
         normal_y = (x1 - x2)/norm;
         normal_x = (y2 - y1)/norm;
@@ -38,7 +38,7 @@ wall::wall (float new_x1, float new_y1, float new_x2, float new_y2, bool is_colo
     color[0] = DEF_WALL_COLOR_R;
     color[1] = DEF_WALL_COLOR_G;
     color[2] = DEF_WALL_COLOR_B;
-    this->is_colored = is_colored;
+    this->is_colored = flag_is_colored;
 }
 
 wall::wall () {

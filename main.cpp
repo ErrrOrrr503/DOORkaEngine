@@ -24,5 +24,6 @@ int main (int argc, char **argv)
         render.draw ();
         glfwPollEvents ();
     }
+    glfwTerminate ();
     return 0;
 }

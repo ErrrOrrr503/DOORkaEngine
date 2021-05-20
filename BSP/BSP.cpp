@@ -77,7 +77,7 @@ bsp_tree_wall::bsp_tree_wall (const std::vector<wall> &level) {
         if (wall_position == -1)
             back_walls.push_back(checked_wall);
         if (wall_position == 3) {
-            std::cout << "BOOOOOOOO" << std::endl;
+            std::cout << "Ambiguous, putting to both trees." << std::endl;
             back_walls.push_back(checked_wall);
             front_walls.push_back(checked_wall);
         }
@@ -127,9 +127,9 @@ int check_line_and_wall_same_point (const wall& wall0, float vecx1, float vecx2,
 
 int check_wall_collision (glm::vec2 &forbidden_direction, const wall& wall0, const glm::vec3 &vec1, const glm::vec3 &vec2){
     float scalar_mul = wall0.normal_x * (vec2.x - vec1.x) + wall0.normal_y * (vec2.y - vec1.y);
-    int sign = 1;
+    float sign = 1.0f;
     if (scalar_mul < 0) // movement vector is in opposite direction with normal
-        sign = -1;
+        sign = -1.0f;
     //std::cout << "location (" << vec1.x << ", " << vec1.y << " new (" << vec2.x << ", " << vec2.y << std::endl;
     if (check_line_and_wall_same_point(wall0, vec1.x, vec1.x + sign * wall0.normal_x * epsilon, vec1.y, vec1.y + sign * wall0.normal_y * epsilon) ||
         check_line_and_wall_same_point(wall0, vec1.x, vec2.x, vec1.y, vec2.y)) {
@@ -227,7 +227,7 @@ int bsp_tree_wall::check_level_collision (const glm::vec3 &pos, glm::vec3 &new_p
     }
     
     if (position_flag == 0) { // nearly impossible due to epsilon
-        std::cout << "FUUUU" <<std::endl;
+        std::cout << "Warning: ambiguous player position!" << std::endl;
         if (back_bsp_tree != nullptr)
             back_bsp_tree -> check_level_collision(pos, new_pos, collised_wall, collised_walls_num);
         if (front_bsp_tree != nullptr)

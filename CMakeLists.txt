@@ -5,7 +5,7 @@ set (CMAKE_VERBOSE_MAKEFILE TRUE)
 add_compile_definitions (GLFW_STATIC GLEW_STATIC)
 
 set (CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_FLAGS_LINUX  "-Wall -Wextra -Wnarrowing -Wfloat-equal -Wundef -Wshadow -Wconversion -Wunreachable-code -Wpointer-arith -Wcast-align -Wwrite-strings -Wswitch-default -Wswitch-enum -Winit-self -Wcast-qual -Wlogical-op")
+set (CMAKE_CXX_FLAGS_LINUX  "-Wall -Wextra -Wnarrowing -Wfloat-equal -Wundef -Wshadow -Wconversion -Wunreachable-code -Wpointer-arith -Wcast-align -Wwrite-strings -Wswitch-default -Wswitch-enum -Winit-self -Wcast-qual -Wlogical-op -fsanitize=address -O3")
 set (CMAKE_EXE_LINKER_FLAGS_LINUX "-lGL -lGLEW -lglfw -lpthread -lSOIL")
 set (CMAKE_EXE_LINKER_FLAGS_WIN32 "opengl32.lib glew32s.lib glfw3.lib")
 

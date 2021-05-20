@@ -68,20 +68,20 @@ void player_position::relocateView()
     if (glfwGetKey(window_, keys_.rot_left) == GLFW_PRESS) {
         course_ -= ang_velocity_ * (GLfloat)elapsed_time_;
         if (course_ < -M_PI)
-            course_ += M_PI + M_PI;
+            course_ += (GLfloat) (M_PI + M_PI);
     }
     if (glfwGetKey(window_, keys_.rot_right) == GLFW_PRESS) {
         course_ += ang_velocity_ * (GLfloat)elapsed_time_;
         if (course_ > M_PI)
-            course_ -= M_PI + M_PI;
+            course_ -= (GLfloat) (M_PI + M_PI);
     }
     if (glfwGetKey(window_, keys_.rot_up) == GLFW_PRESS) {
         if (pitch_ < M_PI_2 - MIN_ANGLE)
-            pitch_ += ang_velocity_ * (GLfloat)elapsed_time_;
+            pitch_ += (GLfloat) (ang_velocity_ * elapsed_time_);
     }
     if (glfwGetKey(window_, keys_.rot_down) == GLFW_PRESS) {
         if (pitch_ > -M_PI_2 + MIN_ANGLE)
-            pitch_ -= ang_velocity_ * (GLfloat)elapsed_time_;
+            pitch_ -= (GLfloat) (ang_velocity_ * elapsed_time_);
     }
 
     direction_ = glm::vec3(
@@ -141,9 +141,9 @@ void player_position::rotateViewMouse(GLfloat x_cursor_offset, GLfloat y_cursor_
     course_ += x_cursor_offset * mouse_sensitivity_;
     pitch_ -= y_cursor_offset * mouse_sensitivity_;
     if (pitch_ > M_PI_2 - MIN_ANGLE)
-        pitch_ = M_PI_2 - MIN_ANGLE;
+        pitch_ = (GLfloat) (M_PI_2 - MIN_ANGLE);
     if (pitch_ < -M_PI_2 + MIN_ANGLE)
-        pitch_ = -M_PI_2 + MIN_ANGLE;
+        pitch_ = (GLfloat) (-M_PI_2 + MIN_ANGLE);
     
     direction_ = glm::vec3(
         sinf(course_) * cosf(pitch_),

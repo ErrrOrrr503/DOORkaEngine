@@ -15,7 +15,7 @@ Textures::~Textures ()
 int Textures::init_gl12 (const Level &level)
 {
     texture_names_list_ = new GLuint[level.texture_list.size ()];
-    glGenTextures (level.texture_list.size (), texture_names_list_);
+    glGenTextures ((GLsizei) level.texture_list.size (), texture_names_list_);
     for (size_t i = 0; i < level.texture_list.size (); i++) {
         int width = 0, height = 0;
         std::cout << "Opening '" << textures_path_ + level.texture_list[i] << "'" << std::endl;
@@ -112,38 +112,16 @@ void Render::draw_gl12 ()
     glLoadMatrixf (glm::value_ptr(gCamera->getPerspMatrix()));
     glColor3f (1.0f, 1.0f, 0.1f);
     //now camera is set and we can draw
-    GLfloat wall[12];
     for (size_t i = 0; i < level_->walls.size (); i++) {
         if (!level_->walls[i].is_colored)
             continue;
         glColor3f (level_->walls[i].color[0], level_->walls[i].color[1], level_->walls[i].color[2]);
-        /*
-        wall[0] = level_->walls[i].x1 / CELL_SIZE;
-        wall[1] = level_->walls[i].y1 / CELL_SIZE;
-        wall[2] = level_->walls[i].zlo1 / CELL_SIZE;
-        wall[3] = level_->walls[i].x1 / CELL_SIZE;
-        wall[4] = level_->walls[i].y1 / CELL_SIZE;
-        wall[5] = level_->walls[i].zhi1 / CELL_SIZE;
-        wall[6] = level_->walls[i].x2 / CELL_SIZE;
-        wall[7] = level_->walls[i].y2 / CELL_SIZE;
-        wall[8] = level_->walls[i].zlo2 / CELL_SIZE;
-        wall[9] = level_->walls[i].x2 / CELL_SIZE;
-        wall[10] = level_->walls[i].y2 / CELL_SIZE;
-        wall[11] = level_->walls[i].zhi2 / CELL_SIZE;
-        glEnableClientState (GL_VERTEX_ARRAY);
-        */
+  
         if (level_->walls[i].texture_index != -1) {
             glEnable (GL_TEXTURE_2D);
             glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // replace wall color by texture
             glBindTexture (GL_TEXTURE_2D, textures_[level_->walls[i].texture_index]);
         }
-        /*
-        glVertexPointer (3, GL_FLOAT, 0, wall);
-        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
-        glLineWidth (2);
-        glColor3f (0.8, 0.2, 0);
-        glDrawArrays (GL_LINE_LOOP, 0, 4);
-        */
         
         glBegin (GL_TRIANGLE_STRIP);
             glTexCoord2f (0, 1); // left floor
@@ -180,7 +158,7 @@ void Render::cursor_callback (GLFWwindow* window, GLdouble xpos, GLdouble ypos)
     static GLdouble lastx = xpos;
     static GLdouble lasty = ypos;
     (void)window;
-    gPos->rotateViewMouse(xpos - lastx, ypos - lasty);
+    gPos->rotateViewMouse ((GLfloat) (xpos - lastx), (GLfloat) (ypos - lasty));
     lastx = xpos;
     lasty = ypos;
 }
@@ -192,7 +170,7 @@ void Render::setCamera (glm::vec3 locationv, glm::vec3 directionv)
     gPos->setDirection (directionv);
 }
 
-void Render::misc_keyboard_input (GLFWwindow *window, int key, int scancode, int action, int mods)
+void Render::misc_keyboard_input (GLFWwindow *window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
