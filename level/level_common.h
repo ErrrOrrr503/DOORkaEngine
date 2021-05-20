@@ -87,13 +87,13 @@ struct level_fileheader {
 struct wall {
     wall ();
     wall (float new_x1, float new_y1, float new_x2, float new_y2);
-    wall (float new_x1, float new_y1, float new_x2, float new_y2, bool is_colored);
+    wall (float new_x1, float new_y1, float new_x2, float new_y2, bool flag_is_colored);
     float x1 = 0, y1 = 0, zlo1 = 0, zhi1 = DEF_WALL_HEIGHT;
     float x2 = 0, y2 = 0, zlo2 = 0, zhi2 = DEF_WALL_HEIGHT;
     float normal_x = 0, normal_y = 0;
     float color[3] = {DEF_WALL_COLOR_R, DEF_WALL_COLOR_G, DEF_WALL_COLOR_B};
     int32_t texture_index = -1;  // -1 no texture; 0-32767 texture index in
-    bool is_colored = false;
+    bool is_colored;
 };
 
 /*!
