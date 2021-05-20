@@ -53,7 +53,7 @@ private:
 class Render {
 public:
     Render () = delete;
-    Render (Level &level);
+    Render (const Level &level);
     ~Render ();
     void draw ();
     render_status_type status ();
@@ -71,7 +71,7 @@ private:
     GLFWwindow *window_;
     int width_ = 800;
     int height_ = 600;
-    Level *level_;
+    const Level *level_;
 };
 
 #endif

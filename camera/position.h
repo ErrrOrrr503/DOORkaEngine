@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 // Full declarations of all friend classes are required here.
 #include "camera.h"
+#include "../BSP/BSP.h"
+#include "../level/level_engine.h"
 
 class player_position
 {
@@ -24,6 +26,7 @@ public:
 
 private:
     GLFWwindow* window_;
+    bsp::bsp_tree_wall* bsp_main_node;
     glm::vec3 location_ = glm::vec3(0.0f, 0.0f, 0.1f);
     glm::vec3 direction_ = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 world_up_ = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -51,7 +54,7 @@ public:
      * @param window Pointer to the window overlooked by camera
      * @details Creates a camera object with default parameters and binds it to window *window.
      */
-    player_position(GLFWwindow* window);
+    player_position(GLFWwindow* window, const Level& level);
     /*!
      * Constructor with parameters.
      * @param window Pointer to the window overlooked by camera
@@ -59,11 +62,11 @@ public:
      * @param start_directionv Initial camera direction vector
      * @details Creates a camera object connected to window *window with provided initial position and direction.
      */
-    player_position(GLFWwindow* window, glm::vec3 start_locationv, glm::vec3 start_directionv);
+    player_position(GLFWwindow* window, const Level& level, glm::vec3 start_locationv, glm::vec3 start_directionv);
     /*!
      * @brief Trivial destructor.
      */
-    ~player_position() = default;
+    ~player_position();
     /*!
      * @brief Process keyboard and mouse input and re-calculate position and direction.
      */

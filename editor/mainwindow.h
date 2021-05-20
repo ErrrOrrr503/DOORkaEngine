@@ -28,7 +28,6 @@ private:
     void open_file_dialog(flag_saveload flag);
 
 private slots:
-    void keyPressEvent (QKeyEvent *ke);
     void print_console (const std::string &s);
     void on_drawButton_clicked();
     void on_selectButton_clicked();
@@ -44,6 +43,8 @@ private slots:
     void on_actionRevert_chandes_triggered();
 
     void on_sel_textureButton_clicked();
+
+    void on_setPosButton_clicked();
 
 signals:
     void ogl_change_mode (edit_mode in_mode);

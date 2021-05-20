@@ -18,10 +18,11 @@ int Textures::init_gl12 (const Level &level)
     glGenTextures (level.texture_list.size (), texture_names_list_);
     for (size_t i = 0; i < level.texture_list.size (); i++) {
         int width = 0, height = 0;
+        std::cout << "Opening '" << textures_path_ + level.texture_list[i] << "'" << std::endl;
         GLubyte *raw_texture = SOIL_load_image ((textures_path_ + level.texture_list[i]).c_str (), &width, &height, 0, SOIL_LOAD_RGBA);
         if (raw_texture == NULL) {
             std::cerr << "Failed to load texture: '" << textures_path_ + level.texture_list[i] << "'" << std::endl;
-            return -1;
+            continue;
         }
         texture_resolutions_.push_back (texture_res(width, height));
         // bind
@@ -44,7 +45,7 @@ GLuint Textures::operator[] (size_t i)
     return texture_names_list_[i];
 }
 
-Render::Render (Level &level)
+Render::Render (const Level &level)
 {
     //fixme: start position of cam in level, will use (0 0 0) (1 0 0) instead
     level_ = &level;
@@ -69,7 +70,8 @@ Render::Render (Level &level)
         status_ = err_glew;
     }
     draw_mode_ = gl12; //fixme: different renders according to hw, same interface;
-    gPos = new player_position (window_, glm::vec3 (0, 0, 25.0 / CELL_SIZE), glm::vec3 (1, 0, 0));
+    gPos = new player_position (window_, level, glm::vec3 (level.start_position[0] / CELL_SIZE, level.start_position[1] / CELL_SIZE, level.start_position[2] / CELL_SIZE),
+                                                glm::vec3 (level.start_direction[0], level.start_direction[1], level.start_direction[2]));
     gPos->setMouseSensitivity(0.005f);
     gCamera = new camera(window_, gPos);
     glEnable (GL_DEPTH_TEST);

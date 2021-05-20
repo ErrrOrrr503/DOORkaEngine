@@ -41,7 +41,10 @@ void OpenDialog::on_actionMainAction_triggered()
 
 void OpenDialog::on_opendialog_selectButton_clicked()
 {
-    filename = QFileDialog::getOpenFileName (this, "Open level").toUtf8 ().constData ();
+    if (flag == load)
+        filename = QFileDialog::getOpenFileName (this, "Open level").toUtf8 ().constData ();
+    if (flag == save)
+        filename = QFileDialog::getSaveFileName(this, "Save level").toUtf8 ().constData ();
     filename_field->clear ();
     filename_field->insertPlainText (QString::fromStdString (filename));
 }

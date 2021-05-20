@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(this, &MainWindow::ogl_change_mode,
                      ogl_out, &oGL_out::ogl_change_mode);
 
-    change_mode(draw);
+    change_mode(draw_clipping_mode);
     print_console("Ready");
 }
 
@@ -33,29 +33,29 @@ MainWindow::~MainWindow()
     outfile.close();
 }
 
-void MainWindow::keyPressEvent (QKeyEvent *ke)
-{
-
-}
-
 void MainWindow::on_drawButton_clicked()
 {
-    change_mode (draw);
+    change_mode (draw_mode);
 }
 
 void MainWindow::on_selectButton_clicked()
 {
-    change_mode (sel);
+    change_mode (sel_mode);
 }
 
 void MainWindow::on_unselButton_clicked()
 {
-    change_mode (unsel);
+    change_mode (unsel_mode);
 }
 
 void MainWindow::on_clippingButton_clicked()
 {
-    change_mode (draw_clipping);
+    change_mode (draw_clipping_mode);
+}
+
+void MainWindow::on_setPosButton_clicked()
+{
+    change_mode (set_pos_mode);
 }
 
 void MainWindow::print_console (const std::string &s)
@@ -73,38 +73,50 @@ void MainWindow::change_mode (edit_mode in_mode)
     mode = in_mode;
     std::string console = "switched to ";
     switch (in_mode) {
-    case draw:
+    case draw_mode:
         console += "'draw'";
         ui->text_tool->setText ("draw");
         ui->drawButton->setDown (1);
         ui->clippingButton->setDown (0);
         ui->selectButton->setDown (0);
         ui->unselButton->setDown (0);
+        ui->setPosButton->setDown (0);
         break;
-    case draw_clipping:
+    case draw_clipping_mode:
         console += "'draw_clipping'";
         ui->text_tool->setText ("clip");
         ui->drawButton->setDown (0);
         ui->clippingButton->setDown (1);
         ui->selectButton->setDown (0);
         ui->unselButton->setDown (0);
+        ui->setPosButton->setDown (0);
         break;
-    case sel:
+    case sel_mode:
         console += "'select'";
         ui->text_tool->setText ("select");
         ui->drawButton->setDown (0);
         ui->clippingButton->setDown (0);
         ui->selectButton->setDown (1);
         ui->unselButton->setDown (0);
+        ui->setPosButton->setDown (0);
         break;
-    case unsel:
+    case unsel_mode:
         console += "'unselect'";
         ui->text_tool->setText ("unsel");
         ui->drawButton->setDown (0);
         ui->clippingButton->setDown (0);
         ui->selectButton->setDown (0);
         ui->unselButton->setDown (1);
+        ui->setPosButton->setDown (0);
         break;
+    case set_pos_mode:
+        console += "'set player position'";
+        ui->text_tool->setText ("setPos");
+        ui->drawButton->setDown (0);
+        ui->clippingButton->setDown (0);
+        ui->selectButton->setDown (0);
+        ui->unselButton->setDown (0);
+        ui->setPosButton->setDown (1);
     default:
         break;
     }
@@ -253,3 +265,4 @@ void MainWindow::on_sel_textureButton_clicked()
     ui->texture_label->clear ();
     ui->texture_label->setText (QString::fromStdString (tex_filename));
 }
+

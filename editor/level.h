@@ -8,12 +8,14 @@
 #include "../level/level_common.h"
 #include "../level/compress.h"
 
+/*
 enum edit_mode {
     sel,
     unsel,
     draw_clipping,
-    draw
-};
+    draw,
+    set_pos
+};*/
 
 enum triangle_side_mode {
     both_sides, //default
@@ -94,6 +96,8 @@ public:
     void swap_triangle_sides ();
     void ctrl_z ();
     void select_texture (const std::string tex_filename);
+    void set_start_position (const float x, const float y, const float z);
+    void set_start_direction (const float x, const float y, const float z);
     //! Vector where all level wall objects are stored. Unsorted.
     std::vector<wall> walls;
     /*!
@@ -111,6 +115,8 @@ public:
     float prev_x = 0, prev_y = 0;
     float prev_prev_x = 0, prev_prev_y = 0;
     float prev_prev_prev_x = 0, prev_prev_prev_y = 0;
+    float start_position[3] = {0, 0, CELL_SIZE / 2};
+    float start_direction[3] = {1, 0, 0};
     triangle_side_mode trig_side_mode = one_side;
     int32_t cur_texture_index = -1;
 

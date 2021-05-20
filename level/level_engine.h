@@ -17,6 +17,8 @@ public:
     const float level_x = LEVEL_X; //to level common?
     const float level_y = LEVEL_Y;
     const float cell_size = CELL_SIZE;
+    float start_position[3];
+    float start_direction[3];
 private:
     int wall_is_present (wall wall);
 };

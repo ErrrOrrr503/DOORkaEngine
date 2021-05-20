@@ -9,7 +9,7 @@ set (CMAKE_CXX_FLAGS_LINUX  "-Wall -Wextra -Wnarrowing -Wfloat-equal -Wundef -Ws
 set (CMAKE_EXE_LINKER_FLAGS_LINUX "-lGL -lGLEW -lglfw -lpthread -lSOIL")
 set (CMAKE_EXE_LINKER_FLAGS_WIN32 "opengl32.lib glew32s.lib glfw3.lib")
 
-set (SOURCE_EXE main.cpp render/render.cpp camera/camera.cpp camera/position.cpp level/level_common.cpp level/level_engine.cpp level/compress.cpp)
+set (SOURCE_EXE main.cpp BSP/BSP.cpp render/render.cpp camera/camera.cpp camera/position.cpp level/level_common.cpp level/level_engine.cpp level/compress.cpp)
 
 include_directories (${CMAKE_SOURCE_DIR}/libraries/glm/include)
 
@@ -34,7 +34,11 @@ elseif (UNIX)
 	find_package (GLEW REQUIRED)
 	if (NOT GLEW_FOUND)
 		message (FATAL_ERROR "GLEW not found, use 'pacman -S glew lib32-glew' to install it (and ubuntu users should now forget about copypasting and find package name themselves ;)")
-	endif ()
+	endif()
+	#find_package (SOIL REQUIRED) cmake does not know SOIL lib
+	#if (NOT SOIL_FOUND)
+	#	message (FATAL_ERROR "SOIL not found, use 'pacman -S soil' to install it (and ubuntu users should now forget about copypasting and find package name themselves ;)")
+	#endif ()
 	set (CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS_LINUX})
 	set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_LINUX})
 else ()
